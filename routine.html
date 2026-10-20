@@ -21,7 +21,7 @@
   --red:#E0655A; --yellow:#E3B23C; --green:#5DBE7F; --neutral:#2E343A;
   --streak:#F0A04B; --streak-bg:#2A2016;
   --font:-apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",Roboto,"Helvetica Neue",Arial,"Noto Sans KR",sans-serif;
-  --radius:14px; --nav-h:50px; --nav-pad:0px;
+  --radius:14px; --nav-h:42px; --nav-pad:0px;
   color-scheme:dark;
 }
 *{box-sizing:border-box}
@@ -50,11 +50,12 @@ html{overflow:hidden;position:fixed;inset:0;width:100%}
 .screen{flex:1;min-height:0;display:none;flex-direction:column}
 .screen.active{display:flex}
 .scroll{flex:1;min-height:0;overflow-y:auto;-webkit-overflow-scrolling:touch;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:0 calc(var(--nav-h) + 90px + var(--nav-pad))}
+.scroll.tight{padding-bottom:calc(var(--nav-h) + 8px);overscroll-behavior:contain}
 .top{padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:10px 0}
-nav.tabbar{position:fixed;left:0;right:0;bottom:0;z-index:20;background:rgba(15,17,19,.92);backdrop-filter:saturate(1.4) blur(14px);-webkit-backdrop-filter:saturate(1.4) blur(14px);border-top:1px solid var(--line);display:flex;justify-content:space-around;padding:5px max(24px,env(safe-area-inset-left,0px)) 0 max(24px,env(safe-area-inset-right,0px));height:var(--nav-h)}
-nav.tabbar button{display:flex;flex-direction:column;align-items:center;gap:3px;min-width:84px;padding:4px 0;color:var(--muted);font-size:11px;font-weight:500;border-radius:10px}
+nav.tabbar{position:fixed;left:0;right:0;bottom:0;z-index:20;background:rgba(15,17,19,.92);backdrop-filter:saturate(1.4) blur(14px);-webkit-backdrop-filter:saturate(1.4) blur(14px);border-top:1px solid var(--line);display:flex;justify-content:space-around;padding:3px max(24px,env(safe-area-inset-left,0px)) 0 max(24px,env(safe-area-inset-right,0px));height:var(--nav-h)}
+nav.tabbar button{display:flex;flex-direction:column;align-items:center;gap:1px;min-width:84px;padding:2px 0;color:var(--muted);font-size:10px;font-weight:500;border-radius:10px}
 nav.tabbar button.active{color:var(--accent);font-weight:600}
-nav.tabbar svg{width:24px;height:24px}
+nav.tabbar svg{width:22px;height:22px}
 
 /* Header */
 .hdr{display:flex;align-items:center;justify-content:space-between;gap:8px;min-height:44px}
@@ -259,8 +260,8 @@ nav.tabbar svg{width:24px;height:24px}
 .mcal span.num i{position:absolute;top:1px;left:2px;font-size:5.5px;font-style:normal;font-weight:500;color:var(--dim);line-height:1}
 .mcal span.ok i{color:rgba(0,0,0,.55)}
 .mcal span b{font-weight:700;font-size:9px;letter-spacing:-.2px;padding-top:4px;max-width:100%;overflow:hidden;white-space:nowrap;line-height:1}
-.mcal span b.sm{font-size:6.5px;letter-spacing:-.3px}
-@media (max-width:380px){.mcal span b{font-size:8px}.mcal span b.sm{font-size:6px}}
+.mcal span b.sm{font-size:5.4px;letter-spacing:-.35px;font-weight:600;padding-top:5px;max-width:95%}
+@media (max-width:380px){.mcal span b{font-size:8px}.mcal span b.sm{font-size:5px}}
 .mcal span b.sm{font-size:7.5px;letter-spacing:-.3px}
 .mcal span:not(.ok) b{color:var(--fg)}
 .mcard .ft{display:flex;align-items:center;justify-content:space-around;font-size:14px;font-weight:600;font-variant-numeric:tabular-nums;padding-top:2px}
@@ -279,7 +280,7 @@ nav.tabbar svg{width:24px;height:24px}
 .wrow .c{width:20px;height:20px;margin:0 auto;border-radius:5px;background:var(--neutral);display:flex;align-items:center;justify-content:center;font-size:11px;color:var(--dim)}
 .wrow .c.ok{background:var(--green)}
 .wrow .c.na{background:transparent}
-.gl-hero{display:flex;flex-direction:column;align-items:center;gap:2px;padding:14px 0 8px;border-bottom:1px solid var(--line)}
+.gl-hero{display:flex;flex-direction:column;align-items:center;gap:0;padding:8px 0 6px;border-bottom:1px solid var(--line)}
 .gl-hero .k{font-size:15px;font-weight:600}
 .gl-hero .v{font-size:40px;font-weight:700;font-variant-numeric:tabular-nums;display:flex;align-items:baseline;gap:6px}
 .gl-hero .v small{font-size:16px;font-weight:500;color:var(--muted)}
@@ -292,7 +293,7 @@ nav.tabbar svg{width:24px;height:24px}
 .gl-circles span.g{background:var(--green);color:#0b2416}
 .gl-circles span.y{background:var(--yellow);color:#2a1e05}
 .gl-circles span.r{background:var(--red);color:#2b0c09}
-.gl-pct{display:flex;flex-direction:column;gap:6px;padding:14px 0 4px;border-top:1px solid var(--line);margin-top:6px}
+.gl-pct{display:flex;flex-direction:column;gap:6px;padding:10px 0 0;border-top:1px solid var(--line);margin-top:6px}
 .gl-pct .k{font-size:14px;font-weight:600;color:var(--muted)}
 .gl-pct .track{position:relative;height:12px;border-radius:6px;background:var(--neutral);overflow:hidden}
 .gl-pct .track i{position:absolute;left:0;top:0;bottom:0;background:var(--green);border-radius:6px}
@@ -1186,6 +1187,7 @@ function monthBlock(h, ym) {
 function renderStats() {
   const b = $('#statsBody'); b.innerHTML = '';
   const tab = S.ui.statTab; const t = todayStr();
+  $('#statsScroll').classList.toggle('tight', tab === 'green');
   if (tab === 'monthly') {
     b.append(pnav(monthTitle(S.ui.statMonth), () => { S.ui.statMonth = addMonths(S.ui.statMonth, -1); renderStats(); }, () => { S.ui.statMonth = addMonths(S.ui.statMonth, 1); renderStats(); }));
     b.append(tagFilterBar(renderStats));
@@ -1193,8 +1195,6 @@ function renderStats() {
     const hs = statHabits().filter(h => days.some(d => existsOn(h, d)));
     if (!hs.length) { b.append(el('<div class="empty"><strong>No habits in this month</strong><span>Logs will appear here once you start.</span></div>')); return; }
     const grid = el('<div class="cards2"></div>'); hs.forEach(h => grid.append(monthBlock(h, S.ui.statMonth))); b.append(grid);
-    let green = 0, elig = 0; days.forEach(d => { if (d > t) return; const s = dayScore(d); if (s.pct != null) { elig++; if (s.pct >= S.settings.threshold) green++; } });
-    b.append(el(`<div class="sumline"><span>Green-check days this month</span><b>${green} <span class="muted small">/ ${elig}</span></b></div>`));
   }
   if (tab === 'weekly') {
     b.append(pnav(weekTitle(S.ui.statWeek), () => { S.ui.statWeek = addDays(S.ui.statWeek, -7); renderStats(); }, () => { S.ui.statWeek = addDays(S.ui.statWeek, 7); renderStats(); }));
@@ -1211,8 +1211,6 @@ function renderStats() {
       tbl.append(el(`<div class="wrow"><div class="nm"><span class="em">${esc(h.emoji)}</span><span class="tx">${esc(h.name)}</span>${goal}</div>${cells}</div>`));
     });
     b.append(tbl);
-    let green = 0, elig = 0; days.forEach(d => { if (d > t) return; const s = dayScore(d); if (s.pct != null) { elig++; if (s.pct >= S.settings.threshold) green++; } });
-    b.append(el(`<div class="sumline"><span>Green-check days this week</span><b>${green} <span class="muted small">/ ${elig}</span></b></div>`));
   }
   if (tab === 'green') {
     b.append(pnav(monthTitle(S.ui.statMonth), () => { S.ui.statMonth = addMonths(S.ui.statMonth, -1); renderStats(); }, () => { S.ui.statMonth = addMonths(S.ui.statMonth, 1); renderStats(); }));

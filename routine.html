@@ -21,7 +21,7 @@
   --red:#E0655A; --yellow:#E3B23C; --green:#5DBE7F; --neutral:#2E343A;
   --streak:#F0A04B; --streak-bg:#2A2016;
   --font:-apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",Roboto,"Helvetica Neue",Arial,"Noto Sans KR",sans-serif;
-  --radius:14px; --nav-h:58px;
+  --radius:14px; --nav-h:54px; --nav-pad:max(6px,calc(env(safe-area-inset-bottom,0px) * 0.45));
   color-scheme:dark;
 }
 *{box-sizing:border-box}
@@ -49,9 +49,9 @@ h1,h2,h3{margin:0;text-wrap:balance}
 html{overflow:hidden;position:fixed;inset:0;width:100%}
 .screen{flex:1;min-height:0;display:none;flex-direction:column}
 .screen.active{display:flex}
-.scroll{flex:1;min-height:0;overflow-y:auto;-webkit-overflow-scrolling:touch;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:0 calc(var(--nav-h) + 90px + env(safe-area-inset-bottom,0px))}
+.scroll{flex:1;min-height:0;overflow-y:auto;-webkit-overflow-scrolling:touch;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:0 calc(var(--nav-h) + 90px + var(--nav-pad))}
 .top{padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:10px 0}
-nav.tabbar{position:fixed;left:0;right:0;bottom:0;z-index:20;background:rgba(15,17,19,.92);backdrop-filter:saturate(1.4) blur(14px);-webkit-backdrop-filter:saturate(1.4) blur(14px);border-top:1px solid var(--line);display:flex;justify-content:space-around;padding:6px max(24px,env(safe-area-inset-left,0px)) calc(6px + env(safe-area-inset-bottom,0px)) max(24px,env(safe-area-inset-right,0px));height:calc(var(--nav-h) + env(safe-area-inset-bottom,0px))}
+nav.tabbar{position:fixed;left:0;right:0;bottom:0;z-index:20;background:rgba(15,17,19,.92);backdrop-filter:saturate(1.4) blur(14px);-webkit-backdrop-filter:saturate(1.4) blur(14px);border-top:1px solid var(--line);display:flex;justify-content:space-around;padding:6px max(24px,env(safe-area-inset-left,0px)) var(--nav-pad) max(24px,env(safe-area-inset-right,0px));height:calc(var(--nav-h) + var(--nav-pad))}
 nav.tabbar button{display:flex;flex-direction:column;align-items:center;gap:3px;min-width:84px;padding:4px 0;color:var(--muted);font-size:11px;font-weight:500;border-radius:10px}
 nav.tabbar button.active{color:var(--accent);font-weight:600}
 nav.tabbar svg{width:24px;height:24px}
@@ -127,7 +127,7 @@ nav.tabbar svg{width:24px;height:24px}
 .bar i{display:block;height:100%;border-radius:3px;background:var(--green);transition:width .3s}
 
 /* FAB */
-.fab{position:fixed;right:max(18px,env(safe-area-inset-right,0px));bottom:calc(var(--nav-h) + 16px + env(safe-area-inset-bottom,0px));width:58px;height:58px;border-radius:29px;background:var(--accent);color:var(--accent-ink);display:flex;align-items:center;justify-content:center;box-shadow:0 8px 20px rgba(0,0,0,.4);z-index:15}
+.fab{position:fixed;right:max(18px,env(safe-area-inset-right,0px));bottom:calc(var(--nav-h) + 16px + var(--nav-pad));width:58px;height:58px;border-radius:29px;background:var(--accent);color:var(--accent-ink);display:flex;align-items:center;justify-content:center;box-shadow:0 8px 20px rgba(0,0,0,.4);z-index:15}
 .fab svg{width:28px;height:28px}
 .fab:active{transform:scale(.94)}
 
@@ -245,11 +245,75 @@ nav.tabbar svg{width:24px;height:24px}
 .gl-grid span.blank{background:transparent}
 .gl-grid span i{position:absolute;top:3px;left:5px;font-size:9px;font-style:normal;color:rgba(255,255,255,.55);font-variant-numeric:tabular-nums}
 .gl-grid span.ok i{color:rgba(0,0,0,.55)}
+.mcard{background:var(--card);border-radius:16px;padding:12px 10px 10px;display:flex;flex-direction:column;gap:10px;min-width:0}
+.mcard .t{display:flex;align-items:center;justify-content:center;gap:5px;font-weight:700;font-size:14px;min-width:0}
+.mcard .t .nm{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.mcal{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:3px}
+.mcal span{aspect-ratio:1;border-radius:5px;background:var(--card-2);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:500;font-variant-numeric:tabular-nums;color:var(--muted);overflow:hidden}
+.mcal span.na{color:var(--dim)}
+.mcal span.fut{color:var(--dim)}
+.mcal span.ok{background:var(--green);color:#0b2416;font-weight:700}
+.mcal span.blank{background:transparent}
+.mcal span b{font-weight:700;font-size:9px;letter-spacing:-.2px}
+.mcal span b.sm{font-size:7.5px;letter-spacing:-.3px}
+.mcal span:not(.ok) b{color:var(--fg)}
+.mcard .ft{display:flex;align-items:center;justify-content:space-around;font-size:14px;font-weight:600;font-variant-numeric:tabular-nums;padding-top:2px}
+.mcard .ft span{display:flex;align-items:center;gap:5px;color:var(--fg)}
+.mcard .ft svg{width:17px;height:17px;color:var(--muted)}
+.mcard .ft i{width:1px;height:16px;background:var(--line-2)}
+.mcard .ft small{font-size:12px;color:var(--muted);font-weight:500}
+.mcard .ft em{font-style:normal;font-size:11px;color:var(--streak);font-weight:700}
+.wtable{background:var(--card);border-radius:14px;overflow:hidden}
+.wrow{display:grid;grid-template-columns:minmax(0,1.25fr) repeat(7,minmax(0,1fr));align-items:center;gap:3px;padding:6px 8px;border-top:1px solid var(--line)}
+.wrow:first-child{border-top:0}
+.wrow.head{padding:8px 8px 6px;font-size:11px;color:var(--muted);font-weight:600;text-align:center}
+.wrow.head span:first-child{text-align:left}
+.wrow.head .td{color:var(--fg)}
+.wrow .nm{display:flex;align-items:center;gap:4px;min-width:0;font-size:12px;font-weight:600;padding-right:4px}
+.wrow .nm .em{font-size:14px;flex:0 0 auto}
+.wrow .nm .tx{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.wrow .c{aspect-ratio:1;border-radius:7px;background:var(--neutral);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;font-variant-numeric:tabular-nums;color:var(--fg);overflow:hidden;max-height:40px}
+.wrow .c.ok{background:var(--green);color:#0b2416}
+.wrow .c.na{background:transparent;box-shadow:inset 0 0 0 1px var(--line)}
+.wrow .c.t8{font-size:8px;letter-spacing:-.3px}
+.gl-hero{display:flex;flex-direction:column;align-items:center;gap:2px;padding:14px 0 8px;border-bottom:1px solid var(--line)}
+.gl-hero .k{font-size:15px;font-weight:600}
+.gl-hero .v{font-size:40px;font-weight:700;font-variant-numeric:tabular-nums;display:flex;align-items:baseline;gap:6px}
+.gl-hero .v small{font-size:16px;font-weight:500;color:var(--muted)}
+.gl-head{display:flex;justify-content:space-between;align-items:baseline;font-size:17px;font-weight:700;color:var(--sage);padding:6px 0 2px}
+.gl-head .muted{font-size:14px;font-weight:500;color:var(--muted)}
+.gl-circles{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:8px 6px;padding:0 2px}
+.gl-circles span{aspect-ratio:1;max-width:44px;width:100%;margin:0 auto;border-radius:50%;background:var(--card-2);display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:600;font-variant-numeric:tabular-nums;color:var(--fg)}
+.gl-circles span.pm{background:transparent;color:var(--muted);font-weight:500}
+.gl-circles span.fut{color:var(--dim)}
+.gl-circles span.g{background:var(--green);color:#0b2416}
+.gl-circles span.y{background:var(--yellow);color:#2a1e05}
+.gl-circles span.r{background:var(--red);color:#2b0c09}
+.gl-pct{display:flex;flex-direction:column;gap:6px;padding:14px 0 4px;border-top:1px solid var(--line);margin-top:6px}
+.gl-pct .k{font-size:14px;font-weight:600;color:var(--muted)}
+.gl-pct .track{position:relative;height:12px;border-radius:6px;background:var(--neutral);overflow:hidden}
+.gl-pct .track i{position:absolute;left:0;top:0;bottom:0;background:var(--green);border-radius:6px}
+.gl-pct .track b{position:absolute;top:0;bottom:0;width:1px;background:var(--line-2)}
+.gl-pct .ticks{position:relative;height:14px;font-size:11px;color:var(--muted);font-variant-numeric:tabular-nums}
+.gl-pct .ticks span{position:absolute;transform:translateX(-50%)}
+.sheet.picker{height:78%;max-height:78%;background:var(--panel)}
+.pk-top{display:flex;align-items:center;gap:8px;padding:12px max(14px,env(safe-area-inset-right,0px)) 8px max(14px,env(safe-area-inset-left,0px))}
+.pk-search{flex:1;display:flex;align-items:center;gap:8px;background:var(--card-2);border-radius:22px;padding:0 12px;height:42px;color:var(--muted)}
+.pk-search svg{width:18px;height:18px;flex:0 0 auto}
+.pk-search input{background:none;border:0;padding:0;min-height:40px;flex:1;font-size:16px;color:var(--fg)}
+.pk-search button{color:var(--muted);font-size:14px;min-width:28px;min-height:28px}
+.pk-top .tb{min-height:40px;padding:0 10px;font-size:16px;font-weight:700;color:var(--accent)}
+.pk-body{flex:1;min-height:0;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:0 max(14px,env(safe-area-inset-right,0px)) 12px max(14px,env(safe-area-inset-left,0px))}
+.pk-h{font-size:15px;font-weight:600;color:var(--fg);padding:14px 2px 8px;position:sticky;top:0;background:var(--panel);z-index:1}
+.pk-grid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:2px}
+.pk-grid button{aspect-ratio:1;border-radius:10px;font-size:30px;line-height:1;display:flex;align-items:center;justify-content:center}
+.pk-grid button.on{background:var(--accent-dim);box-shadow:inset 0 0 0 2px var(--accent)}
+.pk-grid button:active{background:var(--card-2)}
+.pk-tabs{display:flex;gap:2px;padding:6px max(10px,env(safe-area-inset-right,0px)) calc(8px + env(safe-area-inset-bottom,0px)) max(10px,env(safe-area-inset-left,0px));border-top:1px solid var(--line);background:var(--panel)}
+.pk-tabs button{flex:1;min-height:40px;border-radius:10px;font-size:19px;opacity:.55}
+.pk-tabs button.on{background:var(--card-2);opacity:1}
+.pk-empty{padding:40px 0;text-align:center;color:var(--muted)}
 .section-t{font-size:13px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.3px;margin-top:6px}
-canvas.chart{width:100%;height:190px;display:block;background:var(--card);border-radius:12px}
-.legend{font-size:12px;color:var(--muted);display:flex;gap:12px;flex-wrap:wrap}
-.detail-h{display:flex;align-items:center;gap:8px;min-height:44px}
-.detail-h h2{font-size:20px;font-weight:700;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .note-box{background:var(--card);border-radius:12px;padding:12px 14px;font-size:13px;color:var(--muted);line-height:1.5}
 .note-box b{color:var(--fg)}
 .file-btn{position:relative;overflow:hidden}
@@ -297,11 +361,6 @@ canvas.chart{width:100%;height:190px;display:block;background:var(--card);border
     <div class="scroll" id="statsScroll"><div id="statsBody" style="display:flex;flex-direction:column;gap:12px"></div></div>
   </section>
 
-  <!-- HABIT DETAIL (read-only) -->
-  <section class="screen" id="scr-detail">
-    <div class="top"><div class="detail-h"><button class="icon-btn ghost" id="detailBack" aria-label="Back"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 6l-6 6 6 6"/></svg></button><h2 id="detailTitle">Habit</h2></div></div>
-    <div class="scroll"><div id="detailBody" style="display:flex;flex-direction:column;gap:12px"></div></div>
-  </section>
 
   <nav class="tabbar">
     <button data-s="home" class="active"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M3 11l9-8 9 8v9a1 1 0 0 1-1 1h-5v-6h-6v6H4a1 1 0 0 1-1-1z"/></svg><span>Home</span></button>
@@ -311,6 +370,12 @@ canvas.chart{width:100%;height:190px;display:block;background:var(--card);border
 
 <div class="backdrop" id="backdrop"></div>
 <div class="sheet" id="sheet" role="dialog" aria-modal="true"><div class="sheet-h" id="sheetH"></div><div class="sheet-b" id="sheetB"></div></div>
+<div class="backdrop" id="backdrop2" style="z-index:44"></div>
+<div class="sheet picker" id="sheet2" role="dialog" aria-modal="true" style="z-index:45">
+  <div class="pk-top"><div class="pk-search"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></svg><input id="pkSearch" placeholder="Search" autocomplete="off" autocorrect="off" aria-label="Search emoji"><button id="pkClear" class="hidden" aria-label="Clear search">✕</button></div><button class="tb" id="pkClose">Done</button></div>
+  <div class="pk-body" id="pkBody"></div>
+  <div class="pk-tabs" id="pkTabs"></div>
+</div>
 <div class="toast" id="toast" role="status"><span id="toastMsg"></span><button id="toastUndo" class="hidden">Undo</button></div>
 
 <script>
@@ -509,6 +574,7 @@ function greenStreak() {
   while (guard++ < 2000) { const s = dayScore(d); if (s.pct == null) { if (!S.habits.some(h => existsOn(h, d))) break; d = addDays(d, -1); continue; } if (s.pct >= S.settings.threshold) n++; else break; d = addDays(d, -1); }
   return n;
 }
+const EMOJI_GROUPS=[{"name":"Smileys & Emotion","list":[["😀","grinning face"],["😃","grinning face with big eyes"],["😄","grinning face with smiling eyes"],["😁","beaming face with smiling eyes"],["😆","grinning squinting face"],["😅","grinning face with sweat"],["🤣","rolling on the floor laughing"],["😂","face with tears of joy"],["🙂","slightly smiling face"],["🙃","upside-down face"],["🫠","melting face"],["😉","winking face"],["😊","smiling face with smiling eyes"],["😇","smiling face with halo"],["🥰","smiling face with hearts"],["😍","smiling face with heart-eyes"],["🤩","star-struck"],["😘","face blowing a kiss"],["😗","kissing face"],["☺️","smiling face"],["😚","kissing face with closed eyes"],["😙","kissing face with smiling eyes"],["🥲","smiling face with tear"],["😋","face savoring food"],["😛","face with tongue"],["😜","winking face with tongue"],["🤪","zany face"],["😝","squinting face with tongue"],["🤑","money-mouth face"],["🤗","smiling face with open hands"],["🤭","face with hand over mouth"],["🫢","face with open eyes and hand over mouth"],["🫣","face with peeking eye"],["🤫","shushing face"],["🤔","thinking face"],["🫡","saluting face"],["🤐","zipper-mouth face"],["🤨","face with raised eyebrow"],["😐","neutral face"],["😑","expressionless face"],["😶","face without mouth"],["🫥","dotted line face"],["😶‍🌫️","face in clouds"],["😏","smirking face"],["😒","unamused face"],["🙄","face with rolling eyes"],["😬","grimacing face"],["😮‍💨","face exhaling"],["🤥","lying face"],["🫨","shaking face"],["🙂‍↔️","head shaking horizontally"],["🙂‍↕️","head shaking vertically"],["😌","relieved face"],["😔","pensive face"],["😪","sleepy face"],["🤤","drooling face"],["😴","sleeping face"],["😷","face with medical mask"],["🤒","face with thermometer"],["🤕","face with head-bandage"],["🤢","nauseated face"],["🤮","face vomiting"],["🤧","sneezing face"],["🥵","hot face"],["🥶","cold face"],["🥴","woozy face"],["😵","face with crossed-out eyes"],["😵‍💫","face with spiral eyes"],["🤯","exploding head"],["🤠","cowboy hat face"],["🥳","partying face"],["🥸","disguised face"],["😎","smiling face with sunglasses"],["🤓","nerd face"],["🧐","face with monocle"],["😕","confused face"],["🫤","face with diagonal mouth"],["😟","worried face"],["🙁","slightly frowning face"],["☹️","frowning face"],["😮","face with open mouth"],["😯","hushed face"],["😲","astonished face"],["😳","flushed face"],["🥺","pleading face"],["🥹","face holding back tears"],["😦","frowning face with open mouth"],["😧","anguished face"],["😨","fearful face"],["😰","anxious face with sweat"],["😥","sad but relieved face"],["😢","crying face"],["😭","loudly crying face"],["😱","face screaming in fear"],["😖","confounded face"],["😣","persevering face"],["😞","disappointed face"],["😓","downcast face with sweat"],["😩","weary face"],["😫","tired face"],["🥱","yawning face"],["😤","face with steam from nose"],["😡","enraged face"],["😠","angry face"],["🤬","face with symbols on mouth"],["😈","smiling face with horns"],["👿","angry face with horns"],["💀","skull"],["☠️","skull and crossbones"],["💩","pile of poo"],["🤡","clown face"],["👹","ogre"],["👺","goblin"],["👻","ghost"],["👽","alien"],["👾","alien monster"],["🤖","robot"],["😺","grinning cat"],["😸","grinning cat with smiling eyes"],["😹","cat with tears of joy"],["😻","smiling cat with heart-eyes"],["😼","cat with wry smile"],["😽","kissing cat"],["🙀","weary cat"],["😿","crying cat"],["😾","pouting cat"],["🙈","see-no-evil monkey"],["🙉","hear-no-evil monkey"],["🙊","speak-no-evil monkey"],["💌","love letter"],["💘","heart with arrow"],["💝","heart with ribbon"],["💖","sparkling heart"],["💗","growing heart"],["💓","beating heart"],["💞","revolving hearts"],["💕","two hearts"],["💟","heart decoration"],["❣️","heart exclamation"],["💔","broken heart"],["❤️‍🔥","heart on fire"],["❤️‍🩹","mending heart"],["❤️","red heart"],["🩷","pink heart"],["🧡","orange heart"],["💛","yellow heart"],["💚","green heart"],["💙","blue heart"],["🩵","light blue heart"],["💜","purple heart"],["🤎","brown heart"],["🖤","black heart"],["🩶","grey heart"],["🤍","white heart"],["💋","kiss mark"],["💯","hundred points"],["💢","anger symbol"],["💥","collision"],["💫","dizzy"],["💦","sweat droplets"],["💨","dashing away"],["🕳️","hole"],["💬","speech balloon"],["👁️‍🗨️","eye in speech bubble"],["🗨️","left speech bubble"],["🗯️","right anger bubble"],["💭","thought balloon"],["💤","ZZZ"]]},{"name":"People & Body","list":[["👋","waving hand"],["🤚","raised back of hand"],["🖐️","hand with fingers splayed"],["✋","raised hand"],["🖖","vulcan salute"],["🫱","rightwards hand"],["🫲","leftwards hand"],["🫳","palm down hand"],["🫴","palm up hand"],["🫷","leftwards pushing hand"],["🫸","rightwards pushing hand"],["👌","OK hand"],["🤌","pinched fingers"],["🤏","pinching hand"],["✌️","victory hand"],["🤞","crossed fingers"],["🫰","hand with index finger and thumb crossed"],["🤟","love-you gesture"],["🤘","sign of the horns"],["🤙","call me hand"],["👈","backhand index pointing left"],["👉","backhand index pointing right"],["👆","backhand index pointing up"],["🖕","middle finger"],["👇","backhand index pointing down"],["☝️","index pointing up"],["🫵","index pointing at the viewer"],["👍","thumbs up"],["👎","thumbs down"],["✊","raised fist"],["👊","oncoming fist"],["🤛","left-facing fist"],["🤜","right-facing fist"],["👏","clapping hands"],["🙌","raising hands"],["🫶","heart hands"],["👐","open hands"],["🤲","palms up together"],["🤝","handshake"],["🙏","folded hands"],["✍️","writing hand"],["💅","nail polish"],["🤳","selfie"],["💪","flexed biceps"],["🦾","mechanical arm"],["🦿","mechanical leg"],["🦵","leg"],["🦶","foot"],["👂","ear"],["🦻","ear with hearing aid"],["👃","nose"],["🧠","brain"],["🫀","anatomical heart"],["🫁","lungs"],["🦷","tooth"],["🦴","bone"],["👀","eyes"],["👁️","eye"],["👅","tongue"],["👄","mouth"],["🫦","biting lip"],["👶","baby"],["🧒","child"],["👦","boy"],["👧","girl"],["🧑","person"],["👱","person blond hair"],["👨","man"],["🧔","person beard"],["🧔‍♂️","man beard"],["🧔‍♀️","woman beard"],["👨‍🦰","man red hair"],["👨‍🦱","man curly hair"],["👨‍🦳","man white hair"],["👨‍🦲","man bald"],["👩","woman"],["👩‍🦰","woman red hair"],["🧑‍🦰","person red hair"],["👩‍🦱","woman curly hair"],["🧑‍🦱","person curly hair"],["👩‍🦳","woman white hair"],["🧑‍🦳","person white hair"],["👩‍🦲","woman bald"],["🧑‍🦲","person bald"],["👱‍♀️","woman blond hair"],["👱‍♂️","man blond hair"],["🧓","older person"],["👴","old man"],["👵","old woman"],["🙍","person frowning"],["🙍‍♂️","man frowning"],["🙍‍♀️","woman frowning"],["🙎","person pouting"],["🙎‍♂️","man pouting"],["🙎‍♀️","woman pouting"],["🙅","person gesturing NO"],["🙅‍♂️","man gesturing NO"],["🙅‍♀️","woman gesturing NO"],["🙆","person gesturing OK"],["🙆‍♂️","man gesturing OK"],["🙆‍♀️","woman gesturing OK"],["💁","person tipping hand"],["💁‍♂️","man tipping hand"],["💁‍♀️","woman tipping hand"],["🙋","person raising hand"],["🙋‍♂️","man raising hand"],["🙋‍♀️","woman raising hand"],["🧏","deaf person"],["🧏‍♂️","deaf man"],["🧏‍♀️","deaf woman"],["🙇","person bowing"],["🙇‍♂️","man bowing"],["🙇‍♀️","woman bowing"],["🤦","person facepalming"],["🤦‍♂️","man facepalming"],["🤦‍♀️","woman facepalming"],["🤷","person shrugging"],["🤷‍♂️","man shrugging"],["🤷‍♀️","woman shrugging"],["🧑‍⚕️","health worker"],["👨‍⚕️","man health worker"],["👩‍⚕️","woman health worker"],["🧑‍🎓","student"],["👨‍🎓","man student"],["👩‍🎓","woman student"],["🧑‍🏫","teacher"],["👨‍🏫","man teacher"],["👩‍🏫","woman teacher"],["🧑‍⚖️","judge"],["👨‍⚖️","man judge"],["👩‍⚖️","woman judge"],["🧑‍🌾","farmer"],["👨‍🌾","man farmer"],["👩‍🌾","woman farmer"],["🧑‍🍳","cook"],["👨‍🍳","man cook"],["👩‍🍳","woman cook"],["🧑‍🔧","mechanic"],["👨‍🔧","man mechanic"],["👩‍🔧","woman mechanic"],["🧑‍🏭","factory worker"],["👨‍🏭","man factory worker"],["👩‍🏭","woman factory worker"],["🧑‍💼","office worker"],["👨‍💼","man office worker"],["👩‍💼","woman office worker"],["🧑‍🔬","scientist"],["👨‍🔬","man scientist"],["👩‍🔬","woman scientist"],["🧑‍💻","technologist"],["👨‍💻","man technologist"],["👩‍💻","woman technologist"],["🧑‍🎤","singer"],["👨‍🎤","man singer"],["👩‍🎤","woman singer"],["🧑‍🎨","artist"],["👨‍🎨","man artist"],["👩‍🎨","woman artist"],["🧑‍✈️","pilot"],["👨‍✈️","man pilot"],["👩‍✈️","woman pilot"],["🧑‍🚀","astronaut"],["👨‍🚀","man astronaut"],["👩‍🚀","woman astronaut"],["🧑‍🚒","firefighter"],["👨‍🚒","man firefighter"],["👩‍🚒","woman firefighter"],["👮","police officer"],["👮‍♂️","man police officer"],["👮‍♀️","woman police officer"],["🕵️","detective"],["🕵️‍♂️","man detective"],["🕵️‍♀️","woman detective"],["💂","guard"],["💂‍♂️","man guard"],["💂‍♀️","woman guard"],["🥷","ninja"],["👷","construction worker"],["👷‍♂️","man construction worker"],["👷‍♀️","woman construction worker"],["🫅","person with crown"],["🤴","prince"],["👸","princess"],["👳","person wearing turban"],["👳‍♂️","man wearing turban"],["👳‍♀️","woman wearing turban"],["👲","person with skullcap"],["🧕","woman with headscarf"],["🤵","person in tuxedo"],["🤵‍♂️","man in tuxedo"],["🤵‍♀️","woman in tuxedo"],["👰","person with veil"],["👰‍♂️","man with veil"],["👰‍♀️","woman with veil"],["🤰","pregnant woman"],["🫃","pregnant man"],["🫄","pregnant person"],["🤱","breast-feeding"],["👩‍🍼","woman feeding baby"],["👨‍🍼","man feeding baby"],["🧑‍🍼","person feeding baby"],["👼","baby angel"],["🎅","Santa Claus"],["🤶","Mrs. Claus"],["🧑‍🎄","mx claus"],["🦸","superhero"],["🦸‍♂️","man superhero"],["🦸‍♀️","woman superhero"],["🦹","supervillain"],["🦹‍♂️","man supervillain"],["🦹‍♀️","woman supervillain"],["🧙","mage"],["🧙‍♂️","man mage"],["🧙‍♀️","woman mage"],["🧚","fairy"],["🧚‍♂️","man fairy"],["🧚‍♀️","woman fairy"],["🧛","vampire"],["🧛‍♂️","man vampire"],["🧛‍♀️","woman vampire"],["🧜","merperson"],["🧜‍♂️","merman"],["🧜‍♀️","mermaid"],["🧝","elf"],["🧝‍♂️","man elf"],["🧝‍♀️","woman elf"],["🧞","genie"],["🧞‍♂️","man genie"],["🧞‍♀️","woman genie"],["🧟","zombie"],["🧟‍♂️","man zombie"],["🧟‍♀️","woman zombie"],["🧌","troll"],["💆","person getting massage"],["💆‍♂️","man getting massage"],["💆‍♀️","woman getting massage"],["💇","person getting haircut"],["💇‍♂️","man getting haircut"],["💇‍♀️","woman getting haircut"],["🚶","person walking"],["🚶‍♂️","man walking"],["🚶‍♀️","woman walking"],["🚶‍➡️","person walking facing right"],["🚶‍♀️‍➡️","woman walking facing right"],["🚶‍♂️‍➡️","man walking facing right"],["🧍","person standing"],["🧍‍♂️","man standing"],["🧍‍♀️","woman standing"],["🧎","person kneeling"],["🧎‍♂️","man kneeling"],["🧎‍♀️","woman kneeling"],["🧎‍➡️","person kneeling facing right"],["🧎‍♀️‍➡️","woman kneeling facing right"],["🧎‍♂️‍➡️","man kneeling facing right"],["🧑‍🦯","person with white cane"],["🧑‍🦯‍➡️","person with white cane facing right"],["👨‍🦯","man with white cane"],["👨‍🦯‍➡️","man with white cane facing right"],["👩‍🦯","woman with white cane"],["👩‍🦯‍➡️","woman with white cane facing right"],["🧑‍🦼","person in motorized wheelchair"],["🧑‍🦼‍➡️","person in motorized wheelchair facing right"],["👨‍🦼","man in motorized wheelchair"],["👨‍🦼‍➡️","man in motorized wheelchair facing right"],["👩‍🦼","woman in motorized wheelchair"],["👩‍🦼‍➡️","woman in motorized wheelchair facing right"],["🧑‍🦽","person in manual wheelchair"],["🧑‍🦽‍➡️","person in manual wheelchair facing right"],["👨‍🦽","man in manual wheelchair"],["👨‍🦽‍➡️","man in manual wheelchair facing right"],["👩‍🦽","woman in manual wheelchair"],["👩‍🦽‍➡️","woman in manual wheelchair facing right"],["🏃","person running"],["🏃‍♂️","man running"],["🏃‍♀️","woman running"],["🏃‍➡️","person running facing right"],["🏃‍♀️‍➡️","woman running facing right"],["🏃‍♂️‍➡️","man running facing right"],["💃","woman dancing"],["🕺","man dancing"],["🕴️","person in suit levitating"],["👯","people with bunny ears"],["👯‍♂️","men with bunny ears"],["👯‍♀️","women with bunny ears"],["🧖","person in steamy room"],["🧖‍♂️","man in steamy room"],["🧖‍♀️","woman in steamy room"],["🧗","person climbing"],["🧗‍♂️","man climbing"],["🧗‍♀️","woman climbing"],["🤺","person fencing"],["🏇","horse racing"],["⛷️","skier"],["🏂","snowboarder"],["🏌️","person golfing"],["🏌️‍♂️","man golfing"],["🏌️‍♀️","woman golfing"],["🏄","person surfing"],["🏄‍♂️","man surfing"],["🏄‍♀️","woman surfing"],["🚣","person rowing boat"],["🚣‍♂️","man rowing boat"],["🚣‍♀️","woman rowing boat"],["🏊","person swimming"],["🏊‍♂️","man swimming"],["🏊‍♀️","woman swimming"],["⛹️","person bouncing ball"],["⛹️‍♂️","man bouncing ball"],["⛹️‍♀️","woman bouncing ball"],["🏋️","person lifting weights"],["🏋️‍♂️","man lifting weights"],["🏋️‍♀️","woman lifting weights"],["🚴","person biking"],["🚴‍♂️","man biking"],["🚴‍♀️","woman biking"],["🚵","person mountain biking"],["🚵‍♂️","man mountain biking"],["🚵‍♀️","woman mountain biking"],["🤸","person cartwheeling"],["🤸‍♂️","man cartwheeling"],["🤸‍♀️","woman cartwheeling"],["🤼","people wrestling"],["🤼‍♂️","men wrestling"],["🤼‍♀️","women wrestling"],["🤽","person playing water polo"],["🤽‍♂️","man playing water polo"],["🤽‍♀️","woman playing water polo"],["🤾","person playing handball"],["🤾‍♂️","man playing handball"],["🤾‍♀️","woman playing handball"],["🤹","person juggling"],["🤹‍♂️","man juggling"],["🤹‍♀️","woman juggling"],["🧘","person in lotus position"],["🧘‍♂️","man in lotus position"],["🧘‍♀️","woman in lotus position"],["🛀","person taking bath"],["🛌","person in bed"],["🧑‍🤝‍🧑","people holding hands"],["👭","women holding hands"],["👫","woman and man holding hands"],["👬","men holding hands"],["💏","kiss"],["👩‍❤️‍💋‍👨","kiss woman, man"],["👨‍❤️‍💋‍👨","kiss man, man"],["👩‍❤️‍💋‍👩","kiss woman, woman"],["💑","couple with heart"],["👩‍❤️‍👨","couple with heart woman, man"],["👨‍❤️‍👨","couple with heart man, man"],["👩‍❤️‍👩","couple with heart woman, woman"],["👨‍👩‍👦","family man, woman, boy"],["👨‍👩‍👧","family man, woman, girl"],["👨‍👩‍👧‍👦","family man, woman, girl, boy"],["👨‍👩‍👦‍👦","family man, woman, boy, boy"],["👨‍👩‍👧‍👧","family man, woman, girl, girl"],["👨‍👨‍👦","family man, man, boy"],["👨‍👨‍👧","family man, man, girl"],["👨‍👨‍👧‍👦","family man, man, girl, boy"],["👨‍👨‍👦‍👦","family man, man, boy, boy"],["👨‍👨‍👧‍👧","family man, man, girl, girl"],["👩‍👩‍👦","family woman, woman, boy"],["👩‍👩‍👧","family woman, woman, girl"],["👩‍👩‍👧‍👦","family woman, woman, girl, boy"],["👩‍👩‍👦‍👦","family woman, woman, boy, boy"],["👩‍👩‍👧‍👧","family woman, woman, girl, girl"],["👨‍👦","family man, boy"],["👨‍👦‍👦","family man, boy, boy"],["👨‍👧","family man, girl"],["👨‍👧‍👦","family man, girl, boy"],["👨‍👧‍👧","family man, girl, girl"],["👩‍👦","family woman, boy"],["👩‍👦‍👦","family woman, boy, boy"],["👩‍👧","family woman, girl"],["👩‍👧‍👦","family woman, girl, boy"],["👩‍👧‍👧","family woman, girl, girl"],["🗣️","speaking head"],["👤","bust in silhouette"],["👥","busts in silhouette"],["🫂","people hugging"],["👪","family"],["🧑‍🧑‍🧒","family adult, adult, child"],["🧑‍🧑‍🧒‍🧒","family adult, adult, child, child"],["🧑‍🧒","family adult, child"],["🧑‍🧒‍🧒","family adult, child, child"],["👣","footprints"]]},{"name":"Animals & Nature","list":[["🐵","monkey face"],["🐒","monkey"],["🦍","gorilla"],["🦧","orangutan"],["🐶","dog face"],["🐕","dog"],["🦮","guide dog"],["🐕‍🦺","service dog"],["🐩","poodle"],["🐺","wolf"],["🦊","fox"],["🦝","raccoon"],["🐱","cat face"],["🐈","cat"],["🐈‍⬛","black cat"],["🦁","lion"],["🐯","tiger face"],["🐅","tiger"],["🐆","leopard"],["🐴","horse face"],["🫎","moose"],["🫏","donkey"],["🐎","horse"],["🦄","unicorn"],["🦓","zebra"],["🦌","deer"],["🦬","bison"],["🐮","cow face"],["🐂","ox"],["🐃","water buffalo"],["🐄","cow"],["🐷","pig face"],["🐖","pig"],["🐗","boar"],["🐽","pig nose"],["🐏","ram"],["🐑","ewe"],["🐐","goat"],["🐪","camel"],["🐫","two-hump camel"],["🦙","llama"],["🦒","giraffe"],["🐘","elephant"],["🦣","mammoth"],["🦏","rhinoceros"],["🦛","hippopotamus"],["🐭","mouse face"],["🐁","mouse"],["🐀","rat"],["🐹","hamster"],["🐰","rabbit face"],["🐇","rabbit"],["🐿️","chipmunk"],["🦫","beaver"],["🦔","hedgehog"],["🦇","bat"],["🐻","bear"],["🐻‍❄️","polar bear"],["🐨","koala"],["🐼","panda"],["🦥","sloth"],["🦦","otter"],["🦨","skunk"],["🦘","kangaroo"],["🦡","badger"],["🐾","paw prints"],["🦃","turkey"],["🐔","chicken"],["🐓","rooster"],["🐣","hatching chick"],["🐤","baby chick"],["🐥","front-facing baby chick"],["🐦","bird"],["🐧","penguin"],["🕊️","dove"],["🦅","eagle"],["🦆","duck"],["🦢","swan"],["🦉","owl"],["🦤","dodo"],["🪶","feather"],["🦩","flamingo"],["🦚","peacock"],["🦜","parrot"],["🪽","wing"],["🐦‍⬛","black bird"],["🪿","goose"],["🐦‍🔥","phoenix"],["🐸","frog"],["🐊","crocodile"],["🐢","turtle"],["🦎","lizard"],["🐍","snake"],["🐲","dragon face"],["🐉","dragon"],["🦕","sauropod"],["🦖","T-Rex"],["🐳","spouting whale"],["🐋","whale"],["🐬","dolphin"],["🦭","seal"],["🐟","fish"],["🐠","tropical fish"],["🐡","blowfish"],["🦈","shark"],["🐙","octopus"],["🐚","spiral shell"],["🪸","coral"],["🪼","jellyfish"],["🐌","snail"],["🦋","butterfly"],["🐛","bug"],["🐜","ant"],["🐝","honeybee"],["🪲","beetle"],["🐞","lady beetle"],["🦗","cricket"],["🪳","cockroach"],["🕷️","spider"],["🕸️","spider web"],["🦂","scorpion"],["🦟","mosquito"],["🪰","fly"],["🪱","worm"],["🦠","microbe"],["💐","bouquet"],["🌸","cherry blossom"],["💮","white flower"],["🪷","lotus"],["🏵️","rosette"],["🌹","rose"],["🥀","wilted flower"],["🌺","hibiscus"],["🌻","sunflower"],["🌼","blossom"],["🌷","tulip"],["🪻","hyacinth"],["🌱","seedling"],["🪴","potted plant"],["🌲","evergreen tree"],["🌳","deciduous tree"],["🌴","palm tree"],["🌵","cactus"],["🌾","sheaf of rice"],["🌿","herb"],["☘️","shamrock"],["🍀","four leaf clover"],["🍁","maple leaf"],["🍂","fallen leaf"],["🍃","leaf fluttering in wind"],["🪹","empty nest"],["🪺","nest with eggs"],["🍄","mushroom"]]},{"name":"Food & Drink","list":[["🍇","grapes"],["🍈","melon"],["🍉","watermelon"],["🍊","tangerine"],["🍋","lemon"],["🍋‍🟩","lime"],["🍌","banana"],["🍍","pineapple"],["🥭","mango"],["🍎","red apple"],["🍏","green apple"],["🍐","pear"],["🍑","peach"],["🍒","cherries"],["🍓","strawberry"],["🫐","blueberries"],["🥝","kiwi fruit"],["🍅","tomato"],["🫒","olive"],["🥥","coconut"],["🥑","avocado"],["🍆","eggplant"],["🥔","potato"],["🥕","carrot"],["🌽","ear of corn"],["🌶️","hot pepper"],["🫑","bell pepper"],["🥒","cucumber"],["🥬","leafy green"],["🥦","broccoli"],["🧄","garlic"],["🧅","onion"],["🥜","peanuts"],["🫘","beans"],["🌰","chestnut"],["🫚","ginger root"],["🫛","pea pod"],["🍄‍🟫","brown mushroom"],["🍞","bread"],["🥐","croissant"],["🥖","baguette bread"],["🫓","flatbread"],["🥨","pretzel"],["🥯","bagel"],["🥞","pancakes"],["🧇","waffle"],["🧀","cheese wedge"],["🍖","meat on bone"],["🍗","poultry leg"],["🥩","cut of meat"],["🥓","bacon"],["🍔","hamburger"],["🍟","french fries"],["🍕","pizza"],["🌭","hot dog"],["🥪","sandwich"],["🌮","taco"],["🌯","burrito"],["🫔","tamale"],["🥙","stuffed flatbread"],["🧆","falafel"],["🥚","egg"],["🍳","cooking"],["🥘","shallow pan of food"],["🍲","pot of food"],["🫕","fondue"],["🥣","bowl with spoon"],["🥗","green salad"],["🍿","popcorn"],["🧈","butter"],["🧂","salt"],["🥫","canned food"],["🍱","bento box"],["🍘","rice cracker"],["🍙","rice ball"],["🍚","cooked rice"],["🍛","curry rice"],["🍜","steaming bowl"],["🍝","spaghetti"],["🍠","roasted sweet potato"],["🍢","oden"],["🍣","sushi"],["🍤","fried shrimp"],["🍥","fish cake with swirl"],["🥮","moon cake"],["🍡","dango"],["🥟","dumpling"],["🥠","fortune cookie"],["🥡","takeout box"],["🦀","crab"],["🦞","lobster"],["🦐","shrimp"],["🦑","squid"],["🦪","oyster"],["🍦","soft ice cream"],["🍧","shaved ice"],["🍨","ice cream"],["🍩","doughnut"],["🍪","cookie"],["🎂","birthday cake"],["🍰","shortcake"],["🧁","cupcake"],["🥧","pie"],["🍫","chocolate bar"],["🍬","candy"],["🍭","lollipop"],["🍮","custard"],["🍯","honey pot"],["🍼","baby bottle"],["🥛","glass of milk"],["☕","hot beverage"],["🫖","teapot"],["🍵","teacup without handle"],["🍶","sake"],["🍾","bottle with popping cork"],["🍷","wine glass"],["🍸","cocktail glass"],["🍹","tropical drink"],["🍺","beer mug"],["🍻","clinking beer mugs"],["🥂","clinking glasses"],["🥃","tumbler glass"],["🫗","pouring liquid"],["🥤","cup with straw"],["🧋","bubble tea"],["🧃","beverage box"],["🧉","mate"],["🧊","ice"],["🥢","chopsticks"],["🍽️","fork and knife with plate"],["🍴","fork and knife"],["🥄","spoon"],["🔪","kitchen knife"],["🫙","jar"],["🏺","amphora"]]},{"name":"Travel & Places","list":[["🌍","globe showing Europe-Africa"],["🌎","globe showing Americas"],["🌏","globe showing Asia-Australia"],["🌐","globe with meridians"],["🗺️","world map"],["🗾","map of Japan"],["🧭","compass"],["🏔️","snow-capped mountain"],["⛰️","mountain"],["🌋","volcano"],["🗻","mount fuji"],["🏕️","camping"],["🏖️","beach with umbrella"],["🏜️","desert"],["🏝️","desert island"],["🏞️","national park"],["🏟️","stadium"],["🏛️","classical building"],["🏗️","building construction"],["🧱","brick"],["🪨","rock"],["🪵","wood"],["🛖","hut"],["🏘️","houses"],["🏚️","derelict house"],["🏠","house"],["🏡","house with garden"],["🏢","office building"],["🏣","Japanese post office"],["🏤","post office"],["🏥","hospital"],["🏦","bank"],["🏨","hotel"],["🏩","love hotel"],["🏪","convenience store"],["🏫","school"],["🏬","department store"],["🏭","factory"],["🏯","Japanese castle"],["🏰","castle"],["💒","wedding"],["🗼","Tokyo tower"],["🗽","Statue of Liberty"],["⛪","church"],["🕌","mosque"],["🛕","hindu temple"],["🕍","synagogue"],["⛩️","shinto shrine"],["🕋","kaaba"],["⛲","fountain"],["⛺","tent"],["🌁","foggy"],["🌃","night with stars"],["🏙️","cityscape"],["🌄","sunrise over mountains"],["🌅","sunrise"],["🌆","cityscape at dusk"],["🌇","sunset"],["🌉","bridge at night"],["♨️","hot springs"],["🎠","carousel horse"],["🛝","playground slide"],["🎡","ferris wheel"],["🎢","roller coaster"],["💈","barber pole"],["🎪","circus tent"],["🚂","locomotive"],["🚃","railway car"],["🚄","high-speed train"],["🚅","bullet train"],["🚆","train"],["🚇","metro"],["🚈","light rail"],["🚉","station"],["🚊","tram"],["🚝","monorail"],["🚞","mountain railway"],["🚋","tram car"],["🚌","bus"],["🚍","oncoming bus"],["🚎","trolleybus"],["🚐","minibus"],["🚑","ambulance"],["🚒","fire engine"],["🚓","police car"],["🚔","oncoming police car"],["🚕","taxi"],["🚖","oncoming taxi"],["🚗","automobile"],["🚘","oncoming automobile"],["🚙","sport utility vehicle"],["🛻","pickup truck"],["🚚","delivery truck"],["🚛","articulated lorry"],["🚜","tractor"],["🏎️","racing car"],["🏍️","motorcycle"],["🛵","motor scooter"],["🦽","manual wheelchair"],["🦼","motorized wheelchair"],["🛺","auto rickshaw"],["🚲","bicycle"],["🛴","kick scooter"],["🛹","skateboard"],["🛼","roller skate"],["🚏","bus stop"],["🛣️","motorway"],["🛤️","railway track"],["🛢️","oil drum"],["⛽","fuel pump"],["🛞","wheel"],["🚨","police car light"],["🚥","horizontal traffic light"],["🚦","vertical traffic light"],["🛑","stop sign"],["🚧","construction"],["⚓","anchor"],["🛟","ring buoy"],["⛵","sailboat"],["🛶","canoe"],["🚤","speedboat"],["🛳️","passenger ship"],["⛴️","ferry"],["🛥️","motor boat"],["🚢","ship"],["✈️","airplane"],["🛩️","small airplane"],["🛫","airplane departure"],["🛬","airplane arrival"],["🪂","parachute"],["💺","seat"],["🚁","helicopter"],["🚟","suspension railway"],["🚠","mountain cableway"],["🚡","aerial tramway"],["🛰️","satellite"],["🚀","rocket"],["🛸","flying saucer"],["🛎️","bellhop bell"],["🧳","luggage"],["⌛","hourglass done"],["⏳","hourglass not done"],["⌚","watch"],["⏰","alarm clock"],["⏱️","stopwatch"],["⏲️","timer clock"],["🕰️","mantelpiece clock"],["🕛","twelve o’clock"],["🕧","twelve-thirty"],["🕐","one o’clock"],["🕜","one-thirty"],["🕑","two o’clock"],["🕝","two-thirty"],["🕒","three o’clock"],["🕞","three-thirty"],["🕓","four o’clock"],["🕟","four-thirty"],["🕔","five o’clock"],["🕠","five-thirty"],["🕕","six o’clock"],["🕡","six-thirty"],["🕖","seven o’clock"],["🕢","seven-thirty"],["🕗","eight o’clock"],["🕣","eight-thirty"],["🕘","nine o’clock"],["🕤","nine-thirty"],["🕙","ten o’clock"],["🕥","ten-thirty"],["🕚","eleven o’clock"],["🕦","eleven-thirty"],["🌑","new moon"],["🌒","waxing crescent moon"],["🌓","first quarter moon"],["🌔","waxing gibbous moon"],["🌕","full moon"],["🌖","waning gibbous moon"],["🌗","last quarter moon"],["🌘","waning crescent moon"],["🌙","crescent moon"],["🌚","new moon face"],["🌛","first quarter moon face"],["🌜","last quarter moon face"],["🌡️","thermometer"],["☀️","sun"],["🌝","full moon face"],["🌞","sun with face"],["🪐","ringed planet"],["⭐","star"],["🌟","glowing star"],["🌠","shooting star"],["🌌","milky way"],["☁️","cloud"],["⛅","sun behind cloud"],["⛈️","cloud with lightning and rain"],["🌤️","sun behind small cloud"],["🌥️","sun behind large cloud"],["🌦️","sun behind rain cloud"],["🌧️","cloud with rain"],["🌨️","cloud with snow"],["🌩️","cloud with lightning"],["🌪️","tornado"],["🌫️","fog"],["🌬️","wind face"],["🌀","cyclone"],["🌈","rainbow"],["🌂","closed umbrella"],["☂️","umbrella"],["☔","umbrella with rain drops"],["⛱️","umbrella on ground"],["⚡","high voltage"],["❄️","snowflake"],["☃️","snowman"],["⛄","snowman without snow"],["☄️","comet"],["🔥","fire"],["💧","droplet"],["🌊","water wave"]]},{"name":"Activities","list":[["🎃","jack-o-lantern"],["🎄","Christmas tree"],["🎆","fireworks"],["🎇","sparkler"],["🧨","firecracker"],["✨","sparkles"],["🎈","balloon"],["🎉","party popper"],["🎊","confetti ball"],["🎋","tanabata tree"],["🎍","pine decoration"],["🎎","Japanese dolls"],["🎏","carp streamer"],["🎐","wind chime"],["🎑","moon viewing ceremony"],["🧧","red envelope"],["🎀","ribbon"],["🎁","wrapped gift"],["🎗️","reminder ribbon"],["🎟️","admission tickets"],["🎫","ticket"],["🎖️","military medal"],["🏆","trophy"],["🏅","sports medal"],["🥇","1st place medal"],["🥈","2nd place medal"],["🥉","3rd place medal"],["⚽","soccer ball"],["⚾","baseball"],["🥎","softball"],["🏀","basketball"],["🏐","volleyball"],["🏈","american football"],["🏉","rugby football"],["🎾","tennis"],["🥏","flying disc"],["🎳","bowling"],["🏏","cricket game"],["🏑","field hockey"],["🏒","ice hockey"],["🥍","lacrosse"],["🏓","ping pong"],["🏸","badminton"],["🥊","boxing glove"],["🥋","martial arts uniform"],["🥅","goal net"],["⛳","flag in hole"],["⛸️","ice skate"],["🎣","fishing pole"],["🤿","diving mask"],["🎽","running shirt"],["🎿","skis"],["🛷","sled"],["🥌","curling stone"],["🎯","bullseye"],["🪀","yo-yo"],["🪁","kite"],["🔫","water pistol"],["🎱","pool 8 ball"],["🔮","crystal ball"],["🪄","magic wand"],["🎮","video game"],["🕹️","joystick"],["🎰","slot machine"],["🎲","game die"],["🧩","puzzle piece"],["🧸","teddy bear"],["🪅","piñata"],["🪩","mirror ball"],["🪆","nesting dolls"],["♠️","spade suit"],["♥️","heart suit"],["♦️","diamond suit"],["♣️","club suit"],["♟️","chess pawn"],["🃏","joker"],["🀄","mahjong red dragon"],["🎴","flower playing cards"],["🎭","performing arts"],["🖼️","framed picture"],["🎨","artist palette"],["🧵","thread"],["🪡","sewing needle"],["🧶","yarn"],["🪢","knot"]]},{"name":"Objects","list":[["👓","glasses"],["🕶️","sunglasses"],["🥽","goggles"],["🥼","lab coat"],["🦺","safety vest"],["👔","necktie"],["👕","t-shirt"],["👖","jeans"],["🧣","scarf"],["🧤","gloves"],["🧥","coat"],["🧦","socks"],["👗","dress"],["👘","kimono"],["🥻","sari"],["🩱","one-piece swimsuit"],["🩲","briefs"],["🩳","shorts"],["👙","bikini"],["👚","woman’s clothes"],["🪭","folding hand fan"],["👛","purse"],["👜","handbag"],["👝","clutch bag"],["🛍️","shopping bags"],["🎒","backpack"],["🩴","thong sandal"],["👞","man’s shoe"],["👟","running shoe"],["🥾","hiking boot"],["🥿","flat shoe"],["👠","high-heeled shoe"],["👡","woman’s sandal"],["🩰","ballet shoes"],["👢","woman’s boot"],["🪮","hair pick"],["👑","crown"],["👒","woman’s hat"],["🎩","top hat"],["🎓","graduation cap"],["🧢","billed cap"],["🪖","military helmet"],["⛑️","rescue worker’s helmet"],["📿","prayer beads"],["💄","lipstick"],["💍","ring"],["💎","gem stone"],["🔇","muted speaker"],["🔈","speaker low volume"],["🔉","speaker medium volume"],["🔊","speaker high volume"],["📢","loudspeaker"],["📣","megaphone"],["📯","postal horn"],["🔔","bell"],["🔕","bell with slash"],["🎼","musical score"],["🎵","musical note"],["🎶","musical notes"],["🎙️","studio microphone"],["🎚️","level slider"],["🎛️","control knobs"],["🎤","microphone"],["🎧","headphone"],["📻","radio"],["🎷","saxophone"],["🪗","accordion"],["🎸","guitar"],["🎹","musical keyboard"],["🎺","trumpet"],["🎻","violin"],["🪕","banjo"],["🥁","drum"],["🪘","long drum"],["🪇","maracas"],["🪈","flute"],["📱","mobile phone"],["📲","mobile phone with arrow"],["☎️","telephone"],["📞","telephone receiver"],["📟","pager"],["📠","fax machine"],["🔋","battery"],["🪫","low battery"],["🔌","electric plug"],["💻","laptop"],["🖥️","desktop computer"],["🖨️","printer"],["⌨️","keyboard"],["🖱️","computer mouse"],["🖲️","trackball"],["💽","computer disk"],["💾","floppy disk"],["💿","optical disk"],["📀","dvd"],["🧮","abacus"],["🎥","movie camera"],["🎞️","film frames"],["📽️","film projector"],["🎬","clapper board"],["📺","television"],["📷","camera"],["📸","camera with flash"],["📹","video camera"],["📼","videocassette"],["🔍","magnifying glass tilted left"],["🔎","magnifying glass tilted right"],["🕯️","candle"],["💡","light bulb"],["🔦","flashlight"],["🏮","red paper lantern"],["🪔","diya lamp"],["📔","notebook with decorative cover"],["📕","closed book"],["📖","open book"],["📗","green book"],["📘","blue book"],["📙","orange book"],["📚","books"],["📓","notebook"],["📒","ledger"],["📃","page with curl"],["📜","scroll"],["📄","page facing up"],["📰","newspaper"],["🗞️","rolled-up newspaper"],["📑","bookmark tabs"],["🔖","bookmark"],["🏷️","label"],["💰","money bag"],["🪙","coin"],["💴","yen banknote"],["💵","dollar banknote"],["💶","euro banknote"],["💷","pound banknote"],["💸","money with wings"],["💳","credit card"],["🧾","receipt"],["💹","chart increasing with yen"],["✉️","envelope"],["📧","e-mail"],["📨","incoming envelope"],["📩","envelope with arrow"],["📤","outbox tray"],["📥","inbox tray"],["📦","package"],["📫","closed mailbox with raised flag"],["📪","closed mailbox with lowered flag"],["📬","open mailbox with raised flag"],["📭","open mailbox with lowered flag"],["📮","postbox"],["🗳️","ballot box with ballot"],["✏️","pencil"],["✒️","black nib"],["🖋️","fountain pen"],["🖊️","pen"],["🖌️","paintbrush"],["🖍️","crayon"],["📝","memo"],["💼","briefcase"],["📁","file folder"],["📂","open file folder"],["🗂️","card index dividers"],["📅","calendar"],["📆","tear-off calendar"],["🗒️","spiral notepad"],["🗓️","spiral calendar"],["📇","card index"],["📈","chart increasing"],["📉","chart decreasing"],["📊","bar chart"],["📋","clipboard"],["📌","pushpin"],["📍","round pushpin"],["📎","paperclip"],["🖇️","linked paperclips"],["📏","straight ruler"],["📐","triangular ruler"],["✂️","scissors"],["🗃️","card file box"],["🗄️","file cabinet"],["🗑️","wastebasket"],["🔒","locked"],["🔓","unlocked"],["🔏","locked with pen"],["🔐","locked with key"],["🔑","key"],["🗝️","old key"],["🔨","hammer"],["🪓","axe"],["⛏️","pick"],["⚒️","hammer and pick"],["🛠️","hammer and wrench"],["🗡️","dagger"],["⚔️","crossed swords"],["💣","bomb"],["🪃","boomerang"],["🏹","bow and arrow"],["🛡️","shield"],["🪚","carpentry saw"],["🔧","wrench"],["🪛","screwdriver"],["🔩","nut and bolt"],["⚙️","gear"],["🗜️","clamp"],["⚖️","balance scale"],["🦯","white cane"],["🔗","link"],["⛓️‍💥","broken chain"],["⛓️","chains"],["🪝","hook"],["🧰","toolbox"],["🧲","magnet"],["🪜","ladder"],["⚗️","alembic"],["🧪","test tube"],["🧫","petri dish"],["🧬","dna"],["🔬","microscope"],["🔭","telescope"],["📡","satellite antenna"],["💉","syringe"],["🩸","drop of blood"],["💊","pill"],["🩹","adhesive bandage"],["🩼","crutch"],["🩺","stethoscope"],["🩻","x-ray"],["🚪","door"],["🛗","elevator"],["🪞","mirror"],["🪟","window"],["🛏️","bed"],["🛋️","couch and lamp"],["🪑","chair"],["🚽","toilet"],["🪠","plunger"],["🚿","shower"],["🛁","bathtub"],["🪤","mouse trap"],["🪒","razor"],["🧴","lotion bottle"],["🧷","safety pin"],["🧹","broom"],["🧺","basket"],["🧻","roll of paper"],["🪣","bucket"],["🧼","soap"],["🫧","bubbles"],["🪥","toothbrush"],["🧽","sponge"],["🧯","fire extinguisher"],["🛒","shopping cart"],["🚬","cigarette"],["⚰️","coffin"],["🪦","headstone"],["⚱️","funeral urn"],["🧿","nazar amulet"],["🪬","hamsa"],["🗿","moai"],["🪧","placard"],["🪪","identification card"]]},{"name":"Symbols","list":[["🏧","ATM sign"],["🚮","litter in bin sign"],["🚰","potable water"],["♿","wheelchair symbol"],["🚹","men’s room"],["🚺","women’s room"],["🚻","restroom"],["🚼","baby symbol"],["🚾","water closet"],["🛂","passport control"],["🛃","customs"],["🛄","baggage claim"],["🛅","left luggage"],["⚠️","warning"],["🚸","children crossing"],["⛔","no entry"],["🚫","prohibited"],["🚳","no bicycles"],["🚭","no smoking"],["🚯","no littering"],["🚱","non-potable water"],["🚷","no pedestrians"],["📵","no mobile phones"],["🔞","no one under eighteen"],["☢️","radioactive"],["☣️","biohazard"],["⬆️","up arrow"],["↗️","up-right arrow"],["➡️","right arrow"],["↘️","down-right arrow"],["⬇️","down arrow"],["↙️","down-left arrow"],["⬅️","left arrow"],["↖️","up-left arrow"],["↕️","up-down arrow"],["↔️","left-right arrow"],["↩️","right arrow curving left"],["↪️","left arrow curving right"],["⤴️","right arrow curving up"],["⤵️","right arrow curving down"],["🔃","clockwise vertical arrows"],["🔄","counterclockwise arrows button"],["🔙","BACK arrow"],["🔚","END arrow"],["🔛","ON! arrow"],["🔜","SOON arrow"],["🔝","TOP arrow"],["🛐","place of worship"],["⚛️","atom symbol"],["🕉️","om"],["✡️","star of David"],["☸️","wheel of dharma"],["☯️","yin yang"],["✝️","latin cross"],["☦️","orthodox cross"],["☪️","star and crescent"],["☮️","peace symbol"],["🕎","menorah"],["🔯","dotted six-pointed star"],["🪯","khanda"],["♈","Aries"],["♉","Taurus"],["♊","Gemini"],["♋","Cancer"],["♌","Leo"],["♍","Virgo"],["♎","Libra"],["♏","Scorpio"],["♐","Sagittarius"],["♑","Capricorn"],["♒","Aquarius"],["♓","Pisces"],["⛎","Ophiuchus"],["🔀","shuffle tracks button"],["🔁","repeat button"],["🔂","repeat single button"],["▶️","play button"],["⏩","fast-forward button"],["⏭️","next track button"],["⏯️","play or pause button"],["◀️","reverse button"],["⏪","fast reverse button"],["⏮️","last track button"],["🔼","upwards button"],["⏫","fast up button"],["🔽","downwards button"],["⏬","fast down button"],["⏸️","pause button"],["⏹️","stop button"],["⏺️","record button"],["⏏️","eject button"],["🎦","cinema"],["🔅","dim button"],["🔆","bright button"],["📶","antenna bars"],["🛜","wireless"],["📳","vibration mode"],["📴","mobile phone off"],["♀️","female sign"],["♂️","male sign"],["⚧️","transgender symbol"],["✖️","multiply"],["➕","plus"],["➖","minus"],["➗","divide"],["🟰","heavy equals sign"],["♾️","infinity"],["‼️","double exclamation mark"],["⁉️","exclamation question mark"],["❓","red question mark"],["❔","white question mark"],["❕","white exclamation mark"],["❗","red exclamation mark"],["〰️","wavy dash"],["💱","currency exchange"],["💲","heavy dollar sign"],["⚕️","medical symbol"],["♻️","recycling symbol"],["⚜️","fleur-de-lis"],["🔱","trident emblem"],["📛","name badge"],["🔰","Japanese symbol for beginner"],["⭕","hollow red circle"],["✅","check mark button"],["☑️","check box with check"],["✔️","check mark"],["❌","cross mark"],["❎","cross mark button"],["➰","curly loop"],["➿","double curly loop"],["〽️","part alternation mark"],["✳️","eight-spoked asterisk"],["✴️","eight-pointed star"],["❇️","sparkle"],["©️","copyright"],["®️","registered"],["™️","trade mark"],["#️⃣","keycap #"],["*️⃣","keycap *"],["0️⃣","keycap 0"],["1️⃣","keycap 1"],["2️⃣","keycap 2"],["3️⃣","keycap 3"],["4️⃣","keycap 4"],["5️⃣","keycap 5"],["6️⃣","keycap 6"],["7️⃣","keycap 7"],["8️⃣","keycap 8"],["9️⃣","keycap 9"],["🔟","keycap 10"],["🔠","input latin uppercase"],["🔡","input latin lowercase"],["🔢","input numbers"],["🔣","input symbols"],["🔤","input latin letters"],["🅰️","A button (blood type)"],["🆎","AB button (blood type)"],["🅱️","B button (blood type)"],["🆑","CL button"],["🆒","COOL button"],["🆓","FREE button"],["ℹ️","information"],["🆔","ID button"],["Ⓜ️","circled M"],["🆕","NEW button"],["🆖","NG button"],["🅾️","O button (blood type)"],["🆗","OK button"],["🅿️","P button"],["🆘","SOS button"],["🆙","UP! button"],["🆚","VS button"],["🈁","Japanese “here” button"],["🈂️","Japanese “service charge” button"],["🈷️","Japanese “monthly amount” button"],["🈶","Japanese “not free of charge” button"],["🈯","Japanese “reserved” button"],["🉐","Japanese “bargain” button"],["🈹","Japanese “discount” button"],["🈚","Japanese “free of charge” button"],["🈲","Japanese “prohibited” button"],["🉑","Japanese “acceptable” button"],["🈸","Japanese “application” button"],["🈴","Japanese “passing grade” button"],["🈳","Japanese “vacancy” button"],["㊗️","Japanese “congratulations” button"],["㊙️","Japanese “secret” button"],["🈺","Japanese “open for business” button"],["🈵","Japanese “no vacancy” button"],["🔴","red circle"],["🟠","orange circle"],["🟡","yellow circle"],["🟢","green circle"],["🔵","blue circle"],["🟣","purple circle"],["🟤","brown circle"],["⚫","black circle"],["⚪","white circle"],["🟥","red square"],["🟧","orange square"],["🟨","yellow square"],["🟩","green square"],["🟦","blue square"],["🟪","purple square"],["🟫","brown square"],["⬛","black large square"],["⬜","white large square"],["◼️","black medium square"],["◻️","white medium square"],["◾","black medium-small square"],["◽","white medium-small square"],["▪️","black small square"],["▫️","white small square"],["🔶","large orange diamond"],["🔷","large blue diamond"],["🔸","small orange diamond"],["🔹","small blue diamond"],["🔺","red triangle pointed up"],["🔻","red triangle pointed down"],["💠","diamond with a dot"],["🔘","radio button"],["🔳","white square button"],["🔲","black square button"]]},{"name":"Flags","list":[["🏁","chequered flag"],["🚩","triangular flag"],["🎌","crossed flags"],["🏴","black flag"],["🏳️","white flag"],["🏳️‍🌈","rainbow flag"],["🏳️‍⚧️","transgender flag"],["🏴‍☠️","pirate flag"],["🇦🇨","flag Ascension Island"],["🇦🇩","flag Andorra"],["🇦🇪","flag United Arab Emirates"],["🇦🇫","flag Afghanistan"],["🇦🇬","flag Antigua & Barbuda"],["🇦🇮","flag Anguilla"],["🇦🇱","flag Albania"],["🇦🇲","flag Armenia"],["🇦🇴","flag Angola"],["🇦🇶","flag Antarctica"],["🇦🇷","flag Argentina"],["🇦🇸","flag American Samoa"],["🇦🇹","flag Austria"],["🇦🇺","flag Australia"],["🇦🇼","flag Aruba"],["🇦🇽","flag Åland Islands"],["🇦🇿","flag Azerbaijan"],["🇧🇦","flag Bosnia & Herzegovina"],["🇧🇧","flag Barbados"],["🇧🇩","flag Bangladesh"],["🇧🇪","flag Belgium"],["🇧🇫","flag Burkina Faso"],["🇧🇬","flag Bulgaria"],["🇧🇭","flag Bahrain"],["🇧🇮","flag Burundi"],["🇧🇯","flag Benin"],["🇧🇱","flag St. Barthélemy"],["🇧🇲","flag Bermuda"],["🇧🇳","flag Brunei"],["🇧🇴","flag Bolivia"],["🇧🇶","flag Caribbean Netherlands"],["🇧🇷","flag Brazil"],["🇧🇸","flag Bahamas"],["🇧🇹","flag Bhutan"],["🇧🇻","flag Bouvet Island"],["🇧🇼","flag Botswana"],["🇧🇾","flag Belarus"],["🇧🇿","flag Belize"],["🇨🇦","flag Canada"],["🇨🇨","flag Cocos (Keeling) Islands"],["🇨🇩","flag Congo - Kinshasa"],["🇨🇫","flag Central African Republic"],["🇨🇬","flag Congo - Brazzaville"],["🇨🇭","flag Switzerland"],["🇨🇮","flag Côte d’Ivoire"],["🇨🇰","flag Cook Islands"],["🇨🇱","flag Chile"],["🇨🇲","flag Cameroon"],["🇨🇳","flag China"],["🇨🇴","flag Colombia"],["🇨🇵","flag Clipperton Island"],["🇨🇷","flag Costa Rica"],["🇨🇺","flag Cuba"],["🇨🇻","flag Cape Verde"],["🇨🇼","flag Curaçao"],["🇨🇽","flag Christmas Island"],["🇨🇾","flag Cyprus"],["🇨🇿","flag Czechia"],["🇩🇪","flag Germany"],["🇩🇬","flag Diego Garcia"],["🇩🇯","flag Djibouti"],["🇩🇰","flag Denmark"],["🇩🇲","flag Dominica"],["🇩🇴","flag Dominican Republic"],["🇩🇿","flag Algeria"],["🇪🇦","flag Ceuta & Melilla"],["🇪🇨","flag Ecuador"],["🇪🇪","flag Estonia"],["🇪🇬","flag Egypt"],["🇪🇭","flag Western Sahara"],["🇪🇷","flag Eritrea"],["🇪🇸","flag Spain"],["🇪🇹","flag Ethiopia"],["🇪🇺","flag European Union"],["🇫🇮","flag Finland"],["🇫🇯","flag Fiji"],["🇫🇰","flag Falkland Islands"],["🇫🇲","flag Micronesia"],["🇫🇴","flag Faroe Islands"],["🇫🇷","flag France"],["🇬🇦","flag Gabon"],["🇬🇧","flag United Kingdom"],["🇬🇩","flag Grenada"],["🇬🇪","flag Georgia"],["🇬🇫","flag French Guiana"],["🇬🇬","flag Guernsey"],["🇬🇭","flag Ghana"],["🇬🇮","flag Gibraltar"],["🇬🇱","flag Greenland"],["🇬🇲","flag Gambia"],["🇬🇳","flag Guinea"],["🇬🇵","flag Guadeloupe"],["🇬🇶","flag Equatorial Guinea"],["🇬🇷","flag Greece"],["🇬🇸","flag South Georgia & South Sandwich Islands"],["🇬🇹","flag Guatemala"],["🇬🇺","flag Guam"],["🇬🇼","flag Guinea-Bissau"],["🇬🇾","flag Guyana"],["🇭🇰","flag Hong Kong SAR China"],["🇭🇲","flag Heard & McDonald Islands"],["🇭🇳","flag Honduras"],["🇭🇷","flag Croatia"],["🇭🇹","flag Haiti"],["🇭🇺","flag Hungary"],["🇮🇨","flag Canary Islands"],["🇮🇩","flag Indonesia"],["🇮🇪","flag Ireland"],["🇮🇱","flag Israel"],["🇮🇲","flag Isle of Man"],["🇮🇳","flag India"],["🇮🇴","flag British Indian Ocean Territory"],["🇮🇶","flag Iraq"],["🇮🇷","flag Iran"],["🇮🇸","flag Iceland"],["🇮🇹","flag Italy"],["🇯🇪","flag Jersey"],["🇯🇲","flag Jamaica"],["🇯🇴","flag Jordan"],["🇯🇵","flag Japan"],["🇰🇪","flag Kenya"],["🇰🇬","flag Kyrgyzstan"],["🇰🇭","flag Cambodia"],["🇰🇮","flag Kiribati"],["🇰🇲","flag Comoros"],["🇰🇳","flag St. Kitts & Nevis"],["🇰🇵","flag North Korea"],["🇰🇷","flag South Korea"],["🇰🇼","flag Kuwait"],["🇰🇾","flag Cayman Islands"],["🇰🇿","flag Kazakhstan"],["🇱🇦","flag Laos"],["🇱🇧","flag Lebanon"],["🇱🇨","flag St. Lucia"],["🇱🇮","flag Liechtenstein"],["🇱🇰","flag Sri Lanka"],["🇱🇷","flag Liberia"],["🇱🇸","flag Lesotho"],["🇱🇹","flag Lithuania"],["🇱🇺","flag Luxembourg"],["🇱🇻","flag Latvia"],["🇱🇾","flag Libya"],["🇲🇦","flag Morocco"],["🇲🇨","flag Monaco"],["🇲🇩","flag Moldova"],["🇲🇪","flag Montenegro"],["🇲🇫","flag St. Martin"],["🇲🇬","flag Madagascar"],["🇲🇭","flag Marshall Islands"],["🇲🇰","flag North Macedonia"],["🇲🇱","flag Mali"],["🇲🇲","flag Myanmar (Burma)"],["🇲🇳","flag Mongolia"],["🇲🇴","flag Macao SAR China"],["🇲🇵","flag Northern Mariana Islands"],["🇲🇶","flag Martinique"],["🇲🇷","flag Mauritania"],["🇲🇸","flag Montserrat"],["🇲🇹","flag Malta"],["🇲🇺","flag Mauritius"],["🇲🇻","flag Maldives"],["🇲🇼","flag Malawi"],["🇲🇽","flag Mexico"],["🇲🇾","flag Malaysia"],["🇲🇿","flag Mozambique"],["🇳🇦","flag Namibia"],["🇳🇨","flag New Caledonia"],["🇳🇪","flag Niger"],["🇳🇫","flag Norfolk Island"],["🇳🇬","flag Nigeria"],["🇳🇮","flag Nicaragua"],["🇳🇱","flag Netherlands"],["🇳🇴","flag Norway"],["🇳🇵","flag Nepal"],["🇳🇷","flag Nauru"],["🇳🇺","flag Niue"],["🇳🇿","flag New Zealand"],["🇴🇲","flag Oman"],["🇵🇦","flag Panama"],["🇵🇪","flag Peru"],["🇵🇫","flag French Polynesia"],["🇵🇬","flag Papua New Guinea"],["🇵🇭","flag Philippines"],["🇵🇰","flag Pakistan"],["🇵🇱","flag Poland"],["🇵🇲","flag St. Pierre & Miquelon"],["🇵🇳","flag Pitcairn Islands"],["🇵🇷","flag Puerto Rico"],["🇵🇸","flag Palestinian Territories"],["🇵🇹","flag Portugal"],["🇵🇼","flag Palau"],["🇵🇾","flag Paraguay"],["🇶🇦","flag Qatar"],["🇷🇪","flag Réunion"],["🇷🇴","flag Romania"],["🇷🇸","flag Serbia"],["🇷🇺","flag Russia"],["🇷🇼","flag Rwanda"],["🇸🇦","flag Saudi Arabia"],["🇸🇧","flag Solomon Islands"],["🇸🇨","flag Seychelles"],["🇸🇩","flag Sudan"],["🇸🇪","flag Sweden"],["🇸🇬","flag Singapore"],["🇸🇭","flag St. Helena"],["🇸🇮","flag Slovenia"],["🇸🇯","flag Svalbard & Jan Mayen"],["🇸🇰","flag Slovakia"],["🇸🇱","flag Sierra Leone"],["🇸🇲","flag San Marino"],["🇸🇳","flag Senegal"],["🇸🇴","flag Somalia"],["🇸🇷","flag Suriname"],["🇸🇸","flag South Sudan"],["🇸🇹","flag São Tomé & Príncipe"],["🇸🇻","flag El Salvador"],["🇸🇽","flag Sint Maarten"],["🇸🇾","flag Syria"],["🇸🇿","flag Eswatini"],["🇹🇦","flag Tristan da Cunha"],["🇹🇨","flag Turks & Caicos Islands"],["🇹🇩","flag Chad"],["🇹🇫","flag French Southern Territories"],["🇹🇬","flag Togo"],["🇹🇭","flag Thailand"],["🇹🇯","flag Tajikistan"],["🇹🇰","flag Tokelau"],["🇹🇱","flag Timor-Leste"],["🇹🇲","flag Turkmenistan"],["🇹🇳","flag Tunisia"],["🇹🇴","flag Tonga"],["🇹🇷","flag Türkiye"],["🇹🇹","flag Trinidad & Tobago"],["🇹🇻","flag Tuvalu"],["🇹🇼","flag Taiwan"],["🇹🇿","flag Tanzania"],["🇺🇦","flag Ukraine"],["🇺🇬","flag Uganda"],["🇺🇲","flag U.S. Outlying Islands"],["🇺🇳","flag United Nations"],["🇺🇸","flag United States"],["🇺🇾","flag Uruguay"],["🇺🇿","flag Uzbekistan"],["🇻🇦","flag Vatican City"],["🇻🇨","flag St. Vincent & Grenadines"],["🇻🇪","flag Venezuela"],["🇻🇬","flag British Virgin Islands"],["🇻🇮","flag U.S. Virgin Islands"],["🇻🇳","flag Vietnam"],["🇻🇺","flag Vanuatu"],["🇼🇫","flag Wallis & Futuna"],["🇼🇸","flag Samoa"],["🇽🇰","flag Kosovo"],["🇾🇪","flag Yemen"],["🇾🇹","flag Mayotte"],["🇿🇦","flag South Africa"],["🇿🇲","flag Zambia"],["🇿🇼","flag Zimbabwe"],["🏴󠁧󠁢󠁥󠁮󠁧󠁿","flag England"],["🏴󠁧󠁢󠁳󠁣󠁴󠁿","flag Scotland"],["🏴󠁧󠁢󠁷󠁬󠁳󠁿","flag Wales"]]}];
 /* ========== Sheet & toast ========== */
 const Sheet = {
   open(title, bodyEl, opts = {}) {
@@ -539,9 +605,9 @@ $('#toastUndo').addEventListener('click', () => { if (undoAction) { undoAction()
 function showScreen(name) {
   S.ui.screen = name;
   $$('.screen').forEach(s => s.classList.toggle('active', s.id === 'scr-' + name));
-  $$('nav.tabbar button').forEach(b => b.classList.toggle('active', b.dataset.s === (name === 'detail' ? 'stats' : name)));
+  $$('nav.tabbar button').forEach(b => b.classList.toggle('active', b.dataset.s === name));
   $('#fab').classList.toggle('hidden', name !== 'home');
-  if (name === 'home') renderHome(); if (name === 'stats') renderStats(); if (name === 'detail') renderDetail();
+  if (name === 'home') renderHome(); if (name === 'stats') renderStats();
 }
 $$('nav.tabbar button').forEach(b => b.addEventListener('click', () => showScreen(b.dataset.s)));
 
@@ -752,7 +818,6 @@ function habitMenu(h, date) {
   if (!future && h.mode === 'count') add('Adjust total for ' + date, ico.adj, () => countSheet(h, date));
   if (!future && h.mode === 'value') add('Edit value for ' + date, ico.adj, () => valueSheet(h, date));
   if (!future && h.mode === 'time') add('Edit time for ' + date, ico.adj, () => timeSheet(h, date));
-  add('View statistics', ico.stats, () => { S.ui.detailHabit = h.id; showScreen('detail'); });
   add('Edit habit', ico.edit, () => habitForm(h));
   add('Delete habit', ico.del, () => deleteHabitSheet(h), 'danger');
   Sheet.open(h.emoji + ' ' + h.name, body);
@@ -842,10 +907,7 @@ function habitForm(existing) {
   const h = existing ? clone(existing) : DEFAULT_HABIT();
   if (!h.value) h.value = DEFAULT_HABIT().value; if (!h.count) h.count = DEFAULT_HABIT().count;
   const body = el(`<div style="display:flex;flex-direction:column;gap:18px">
-    <div class="emoji-big" id="fEmojiBig">${esc(h.emoji)}<input id="fEmojiIn" aria-label="Emoji" inputmode="text" autocomplete="off"></div>
-    <div class="small muted" style="text-align:center;margin-top:-10px">Tap the emoji to type any emoji from your keyboard</div>
-    <div class="emoji-grid" id="fEmojiGrid"></div>
-    <div class="field"><label for="fName">Habit name</label><input id="fName" placeholder="e.g. Drink Water" value="${esc(h.name)}" autocomplete="off"></div>
+    <div class="field"><label for="fName">Habit name</label><div class="row"><input id="fName" class="grow" placeholder="e.g. Drink Water" value="${esc(h.name)}" autocomplete="off"><button type="button" id="fEmojiBtn" aria-label="Choose emoji" style="width:54px;height:54px;flex:0 0 auto;border-radius:12px;background:var(--card-2);border:1px solid var(--line-2);font-size:28px;display:flex;align-items:center;justify-content:center">${esc(h.emoji)}</button></div><div class="help">Tap the emoji box to pick from all emoji.</div></div>
     <div class="field"><label for="fNote">Notes / timing instructions</label><input id="fNote" placeholder="e.g. Right out of bed" value="${esc(h.note)}" autocomplete="off"><div class="help">Shown in the second column. Optional.</div></div>
     <div class="field"><span class="lbl">Time of day</span><div class="seg" id="fTime"><button data-v="any">Anytime</button><button data-v="morning">Morning</button><button data-v="afternoon">Afternoon</button><button data-v="evening">Evening</button></div></div>
     <div class="field"><span class="lbl">Tags</span><div class="pills" id="fTags"></div></div>
@@ -871,12 +933,8 @@ function habitForm(existing) {
     <datalist id="unitList">${UNITS.filter(Boolean).map(u => `<option value="${u}">`).join('')}</datalist>
   </div>`);
   // emoji
-  const big = body.querySelector('#fEmojiBig'), ein = body.querySelector('#fEmojiIn');
-  const setEmoji = e => { h.emoji = e; big.firstChild.textContent = e; body.querySelectorAll('#fEmojiGrid button').forEach(b => b.classList.toggle('on', b.textContent === e)); };
-  ein.addEventListener('input', () => { const v = Array.from(ein.value.trim()); if (v.length) setEmoji(v[v.length - 1]); ein.value = ''; });
-  const grid = body.querySelector('#fEmojiGrid');
-  EMOJIS.forEach(e => { const b = el(`<button type="button" aria-label="${e}">${e}</button>`); b.addEventListener('click', () => setEmoji(e)); grid.append(b); });
-  setEmoji(h.emoji);
+  const ebtn = body.querySelector('#fEmojiBtn');
+  ebtn.addEventListener('click', () => EmojiPicker.open(h.emoji, e => { h.emoji = e; ebtn.textContent = e; }));
   // seg helper
   const seg = (id, get, set, onChange) => { const s = body.querySelector(id); s.querySelectorAll('button').forEach(b => { b.classList.toggle('on', b.dataset.v === String(get())); b.addEventListener('click', () => { set(b.dataset.v); s.querySelectorAll('button').forEach(x => x.classList.toggle('on', x === b)); if (onChange) onChange(); }); }); };
   seg('#fTime', () => h.timeOfDay, v => h.timeOfDay = v);
@@ -1013,9 +1071,62 @@ function importJSON(text) {
   });
   Sheet.open('Restore backup', body, { cancelLabel: 'Cancel' });
 }
+/* ========== Emoji picker ========== */
+const PK_ICONS = ['😀', '👥', '🌳', '🍕', '✈️', '⚽', '💡', '🚫', '🏁'];
+const EmojiPicker = {
+  onPick: null, current: null, built: false,
+  open(current, onPick) {
+    this.onPick = onPick; this.current = current;
+    if (!this.built) this.build();
+    $('#pkSearch').value = ''; $('#pkClear').classList.add('hidden');
+    this.renderAll();
+    $('#backdrop2').classList.add('show'); $('#sheet2').classList.add('show');
+    $('#pkBody').scrollTop = 0;
+  },
+  close() { $('#backdrop2').classList.remove('show'); $('#sheet2').classList.remove('show'); },
+  build() {
+    this.built = true;
+    const tabs = $('#pkTabs'); tabs.innerHTML = '';
+    EMOJI_GROUPS.forEach((g, i) => { const b = el(`<button type="button" aria-label="${esc(g.name)}">${PK_ICONS[i] || '•'}</button>`); b.addEventListener('click', () => { if ($('#pkSearch').value) { $('#pkSearch').value = ''; this.renderAll(); } const h = $('#pk-g' + i); if (h) $('#pkBody').scrollTop = h.offsetTop - 2; }); tabs.append(b); });
+    $('#pkSearch').addEventListener('input', e => { const q = e.target.value.trim().toLowerCase(); $('#pkClear').classList.toggle('hidden', !q); q ? this.renderSearch(q) : this.renderAll(); });
+    $('#pkClear').addEventListener('click', () => { $('#pkSearch').value = ''; $('#pkClear').classList.add('hidden'); this.renderAll(); $('#pkSearch').focus(); });
+    $('#pkClose').addEventListener('click', () => this.close());
+    $('#backdrop2').addEventListener('click', () => this.close());
+    $('#pkBody').addEventListener('scroll', () => this.syncTab(), { passive: true });
+  },
+  grid(list) {
+    const g = el('<div class="pk-grid"></div>');
+    list.forEach(([e, name]) => { const b = el(`<button type="button" class="${e === this.current ? 'on' : ''}" aria-label="${esc(name)}">${e}</button>`); b.addEventListener('click', () => { this.current = e; if (this.onPick) this.onPick(e); haptic(8); this.close(); }); g.append(b); });
+    return g;
+  },
+  recent() {
+    const seen = new Set(); const out = [];
+    activeHabits().slice().reverse().forEach(h => { if (h.emoji && !seen.has(h.emoji)) { seen.add(h.emoji); out.push([h.emoji, 'recent']); } });
+    return out.slice(0, 14);
+  },
+  renderAll() {
+    const b = $('#pkBody'); b.innerHTML = '';
+    const r = this.recent();
+    if (r.length) { b.append(el('<div class="pk-h">Recently used</div>')); b.append(this.grid(r)); }
+    EMOJI_GROUPS.forEach((g, i) => { b.append(el(`<div class="pk-h" id="pk-g${i}">${esc(g.name)}</div>`)); b.append(this.grid(g.list)); });
+    this.syncTab();
+  },
+  renderSearch(q) {
+    const b = $('#pkBody'); b.innerHTML = '';
+    const hits = [];
+    EMOJI_GROUPS.forEach(g => g.list.forEach(x => { if (x[1].includes(q) || x[0] === q) hits.push(x); }));
+    if (!hits.length) { b.append(el(`<div class="pk-empty">No emoji for "${esc(q)}"</div>`)); return; }
+    b.append(el(`<div class="pk-h">${hits.length} result${hits.length === 1 ? '' : 's'}</div>`)); b.append(this.grid(hits.slice(0, 300)));
+  },
+  syncTab() {
+    const body = $('#pkBody'); const y = body.scrollTop + 60; let idx = 0;
+    EMOJI_GROUPS.forEach((g, i) => { const h = $('#pk-g' + i); if (h && h.offsetTop <= y) idx = i; });
+    $$('#pkTabs button').forEach((b, i) => b.classList.toggle('on', i === idx));
+  }
+};
 /* ========== Statistics ========== */
 $$('#statTabs button').forEach(b => b.addEventListener('click', () => { S.ui.statTab = b.dataset.t; $$('#statTabs button').forEach(x => x.classList.toggle('on', x === b)); renderStats(); }));
-function statHabits(date) { return S.habits.filter(h => (S.ui.statTag == null || h.tags.includes(S.ui.statTag))); }
+function statHabits() { return S.habits.filter(h => (S.ui.statTag == null || h.tags.includes(S.ui.statTag))).sort((a, b) => a.order - b.order); }
 function tagFilterBar(onChange) {
   const f = el('<div class="filters" style="padding:0"></div>');
   const all = el(`<button class="chip tag ${S.ui.statTag == null ? 'on' : ''}">All</button>`); all.addEventListener('click', () => { S.ui.statTag = null; onChange(); }); f.append(all);
@@ -1038,202 +1149,92 @@ function habitDayStatus(h, d) {
   if (!isScheduled(h, d)) return 'na';
   return isDone(h, d) ? 'ok' : 'miss';
 }
-function miniCal(h, days) {
-  const first = dow(days[0]);
-  let html = '<div class="mini">';
-  for (let i = 0; i < first; i++) html += '<span class="blank"></span>';
-  days.forEach(d => { const s = habitDayStatus(h, d); html += `<span class="${s === 'ok' ? 'ok' : s === 'miss' ? '' : 'na'}" title="${d}">${s === 'ok' ? '✓' : ''}</span>`; });
-  return html + '</div>';
+/* what to print inside a day cell: value for numeric/time modes, ✓ for checks */
+function cellText(h, d) {
+  const l = getLog(h.id, d);
+  if (h.mode === 'time') return l && l.done && l.at ? { txt: fmtTime(l.at).replace(' ', ''), small: true } : null;
+  if (h.mode === 'value') { if (!l || l.value == null) return null; const f = h.value.format; const s = f === 'time' ? fmtMinutes(l.value).replace(' ', '') : f === 'duration' ? fmtDuration(l.value).replace(' ', '') : fmtNum(l.value); return { txt: s, small: s.length > 4 }; }
+  if (h.mode === 'count') return l && l.total ? { txt: fmtNum(l.total), small: String(fmtNum(l.total)).length > 4 } : null;
+  return null;
+}
+function dayCell(h, d, cls) {
+  const s = habitDayStatus(h, d); const c = cellText(h, d);
+  const klass = s === 'ok' ? 'ok' : s === 'miss' ? '' : 'na';
+  const inner = c ? esc(c.txt) : (s === 'ok' ? '✓' : '');
+  return `<span class="${klass}${c && c.small ? ' ' + cls : ''}" title="${d}"><i>${Number(d.slice(8))}</i>${inner}</span>`;
 }
 function habitMonthStats(h, ym) {
   const days = monthDays(ym); let ok = 0, due = 0;
   days.forEach(d => { const s = habitDayStatus(h, d); if (s === 'ok') { ok++; due++; } else if (s === 'miss') due++; });
-  let periods = null;
-  if (isFlex(h)) { const keys = new Set(); days.forEach(d => { if (existsOn(h, d) && d <= todayStr()) keys.add(periodKey(h, d)); }); let met = 0; keys.forEach(k => { if (periodMet(h, k)) met++; }); periods = { met, total: keys.size }; }
-  return { ok, due, pct: due ? Math.round(ok / due * 100) : null, periods };
+  return { ok, due, pct: due ? Math.round(ok / due * 100) : null };
 }
-function habitCard(h, days, ym) {
-  const st = habitMonthStats(h, ym);
-  let goal = '';
-  if (isFlex(h)) { const p = periodProgress(h, days[days.length - 1] <= todayStr() ? days[days.length - 1] : todayStr()); goal = h.schedule.type === 'monthly' ? `<div class="meta"><span>Month goal</span><b>${p.n}/${h.schedule.target}</b></div>` : `<div class="meta"><span>Weeks met</span><b>${st.periods.met}/${st.periods.total}</b></div>`; }
-  const c = el(`<button class="scard"><div class="t"><span>${esc(h.emoji)}</span><span class="nm">${esc(h.name)}</span>${h.deletedAt ? '<span class="small dim">(removed)</span>' : ''}</div>${miniCal(h, days)}<div class="meta"><span>${isFlex(h) ? 'Done days' : 'Success'}</span><b>${st.pct == null ? '—' : st.pct + '%'}</b></div><div class="meta"><span>${isFlex(h) ? 'Completed' : 'Days met'}</span><b>${st.ok}${isFlex(h) ? '' : '/' + st.due}</b></div>${goal}</button>`);
-  c.addEventListener('click', () => { S.ui.detailHabit = h.id; showScreen('detail'); });
-  return c;
+function monthBlock(h, ym) {
+  const days = monthDays(ym); const first = dow(days[0]); const st = habitMonthStats(h, ym);
+  let pctTxt, cntTxt;
+  if (isFlex(h)) { const last = days[days.length - 1] <= todayStr() ? days[days.length - 1] : todayStr(); const p = h.schedule.type === 'monthly' ? periodProgress(h, last) : null; pctTxt = p ? Math.min(100, Math.round(p.n / p.target * 100)) + '%' : '—'; cntTxt = p ? `${p.n}/${p.target}` : String(st.ok); }
+  else { pctTxt = st.pct == null ? '—' : st.pct + '%'; cntTxt = String(st.ok); }
+  let cells = '';
+  for (let i = 0; i < first; i++) cells += '<span class="blank"></span>';
+  days.forEach(d => {
+    const s = habitDayStatus(h, d); const c = cellText(h, d); const n = Number(d.slice(8));
+    const klass = s === 'ok' ? 'ok' : s === 'na' ? 'na' : s === 'future' ? 'fut' : '';
+    const inner = c ? `<b class="${c.small ? 'sm' : ''}">${esc(c.txt)}</b>` : (s === 'na' ? '–' : String(n));
+    cells += `<span class="${klass}" title="${d}${c ? ' · ' + esc(c.txt) : ''}">${inner}</span>`;
+  });
+  return el(`<div class="mcard"><div class="t"><span>${esc(h.emoji)}</span><span class="nm">${esc(h.name)}</span></div><div class="mcal">${cells}</div><div class="ft"><span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="8"/><path d="M8.5 12l2.5 2.5 4.5-5"/></svg>${cntTxt} <small>days</small>${h.streak && !h.deletedAt && currentStreak(h) > 0 ? ` <em>🔥${currentStreak(h)}</em>` : ''}</span></div></div>`);
 }
 function renderStats() {
   const b = $('#statsBody'); b.innerHTML = '';
-  const tab = S.ui.statTab;
+  const tab = S.ui.statTab; const t = todayStr();
   if (tab === 'monthly') {
     b.append(pnav(monthTitle(S.ui.statMonth), () => { S.ui.statMonth = addMonths(S.ui.statMonth, -1); renderStats(); }, () => { S.ui.statMonth = addMonths(S.ui.statMonth, 1); renderStats(); }));
     b.append(tagFilterBar(renderStats));
     const days = monthDays(S.ui.statMonth);
-    const hs = statHabits().filter(h => days.some(d => existsOn(h, d))).sort((a, c) => a.order - c.order);
+    const hs = statHabits().filter(h => days.some(d => existsOn(h, d)));
     if (!hs.length) { b.append(el('<div class="empty"><strong>No habits in this month</strong><span>Logs will appear here once you start.</span></div>')); return; }
-    const grid = el('<div class="cards2"></div>'); hs.forEach(h => grid.append(habitCard(h, days, S.ui.statMonth))); b.append(grid);
-    let green = 0, elig = 0; days.forEach(d => { if (d > todayStr()) return; const s = dayScore(d); if (s.pct != null) { elig++; if (s.pct >= S.settings.threshold) green++; } });
+    const grid = el('<div class="cards2"></div>'); hs.forEach(h => grid.append(monthBlock(h, S.ui.statMonth))); b.append(grid);
+    let green = 0, elig = 0; days.forEach(d => { if (d > t) return; const s = dayScore(d); if (s.pct != null) { elig++; if (s.pct >= S.settings.threshold) green++; } });
     b.append(el(`<div class="sumline"><span>Green-check days this month</span><b>${green} <span class="muted small">/ ${elig}</span></b></div>`));
   }
   if (tab === 'weekly') {
     b.append(pnav(weekTitle(S.ui.statWeek), () => { S.ui.statWeek = addDays(S.ui.statWeek, -7); renderStats(); }, () => { S.ui.statWeek = addDays(S.ui.statWeek, 7); renderStats(); }));
     b.append(tagFilterBar(renderStats));
-    const days = weekDays(S.ui.statWeek); const t = todayStr();
-    const hs = statHabits();
-    let sumPct = 0, nPct = 0, done = 0, due = 0, green = 0;
-    const bars = el('<div class="wk-bars"></div>');
-    days.forEach(d => {
-      const s = d > t ? { pct: null, done: 0, due: 0 } : dayScore(d, hs.filter(h => existsOn(h, d)));
-      if (s.pct != null) { sumPct += s.pct; nPct++; if (s.pct >= S.settings.threshold) green++; }
-      done += s.done; due += s.due;
-      bars.append(el(`<div class="col ${d === t ? 'today' : ''}"><span class="p">${s.pct == null ? '' : s.pct + '%'}</span><div class="b" style="height:${s.pct == null ? 3 : Math.max(3, s.pct)}%;background:${s.pct == null ? 'var(--neutral)' : colorVar(scoreColor(s.pct))}"></div><span class="d">${DAYS[dow(d)]}</span></div>`));
+    const days = weekDays(S.ui.statWeek);
+    const hs = statHabits().filter(h => days.some(d => existsOn(h, d)));
+    if (!hs.length) { b.append(el('<div class="empty"><strong>No habits in this week</strong><span>Logs will appear here once you start.</span></div>')); return; }
+    const tbl = el('<div class="wtable"></div>');
+    tbl.append(el(`<div class="wrow head"><span>Habit</span>${days.map(d => `<span class="${d === t ? 'td' : ''}">${DAYS[dow(d)]}<br>${Number(d.slice(8))}</span>`).join('')}</div>`));
+    hs.forEach(h => {
+      let goal = '';
+      if (h.schedule.type === 'weekly') { const p = periodProgress(h, S.ui.statWeek); goal = `<span class="badge goal ${p.n >= p.target ? 'met' : ''}" style="height:18px;font-size:10px;padding:0 5px">${p.n}/${p.target}</span>`; }
+      tbl.append(el(`<div class="wrow"><div class="nm"><span class="em">${esc(h.emoji)}</span><span class="tx">${esc(h.name)}</span>${goal}</div>${days.map(d => dayCell(h, d, 't8').replace('<span class="', '<span class="c ')).join('')}</div>`));
     });
-    b.append(el(`<div class="tiles"><div class="tile"><span class="k">Weekly average</span><span class="v" style="color:${nPct ? colorVar(scoreColor(Math.round(sumPct / nPct))) : ''}">${nPct ? Math.round(sumPct / nPct) + '%' : '—'}</span><span class="s">${nPct} day${nPct === 1 ? '' : 's'} scored</span></div><div class="tile"><span class="k">Completed</span><span class="v">${done}</span><span class="s">of ${due} due</span></div><div class="tile"><span class="k">Green days</span><span class="v" style="color:var(--green)">${green}</span><span class="s">≥ ${S.settings.threshold}%</span></div></div>`));
-    b.append(bars);
-    const flex = hs.filter(h => h.schedule.type === 'weekly' && days.some(d => existsOn(h, d)));
-    if (flex.length) {
-      b.append(el('<div class="section-t">Weekly goals</div>'));
-      const l = el('<div class="list"></div>');
-      flex.forEach(h => { const p = periodProgress(h, S.ui.statWeek); l.append(el(`<div class="li"><span>${esc(h.emoji)}</span><span class="nm">${esc(h.name)}</span><span class="badge goal ${p.n >= p.target ? 'met' : ''}">${p.n}/${p.target}</span></div>`)); });
-      b.append(l);
-    }
-    b.append(el('<div class="section-t">Per day</div>'));
-    const l2 = el('<div class="list"></div>');
-    days.forEach(d => { const s = d > t ? null : dayScore(d, hs.filter(h => existsOn(h, d))); const dd = parseDate(d); l2.append(el(`<div class="li"><span class="nm">${DAYS[dd.getDay()]} ${MONTHS_S[dd.getMonth()]} ${dd.getDate()}</span><span class="v">${s ? s.done + ' / ' + s.due : '—'}</span><span class="badge goal" style="${s && s.pct != null ? 'color:' + colorVar(scoreColor(s.pct)) : ''}">${s && s.pct != null ? s.pct + '%' : d > t ? 'upcoming' : 'no habits'}</span></div>`)); });
-    b.append(l2);
+    b.append(tbl);
+    let green = 0, elig = 0; days.forEach(d => { if (d > t) return; const s = dayScore(d); if (s.pct != null) { elig++; if (s.pct >= S.settings.threshold) green++; } });
+    b.append(el(`<div class="sumline"><span>Green-check days this week</span><b>${green} <span class="muted small">/ ${elig}</span></b></div>`));
   }
   if (tab === 'green') {
     b.append(pnav(monthTitle(S.ui.statMonth), () => { S.ui.statMonth = addMonths(S.ui.statMonth, -1); renderStats(); }, () => { S.ui.statMonth = addMonths(S.ui.statMonth, 1); renderStats(); }));
-    const days = monthDays(S.ui.statMonth); const t = todayStr();
+    const days = monthDays(S.ui.statMonth);
+    const [yy, mm] = S.ui.statMonth.split('-').map(Number);
     const first = dow(days[0]); let green = 0, elig = 0;
-    const grid = el('<div class="gl-grid"></div>');
-    for (let i = 0; i < first; i++) grid.append(el('<span class="blank"></span>'));
-    const weeks = {};
+    const prevN = daysInMonth(yy, mm - 2);
+    let cells = '';
+    for (let i = 0; i < first; i++) cells += `<span class="pm">${prevN - first + 1 + i}</span>`;
     days.forEach(d => {
       const s = d > t ? null : dayScore(d);
-      let cls = 'na', inner = '';
-      if (s && s.pct != null) { elig++; if (s.pct >= S.settings.threshold) { green++; cls = 'ok'; inner = '✓'; } else cls = ''; }
-      const wk = weekStart(d); weeks[wk] = weeks[wk] || { g: 0, e: 0 }; if (s && s.pct != null) { weeks[wk].e++; if (cls === 'ok') weeks[wk].g++; }
-      grid.append(el(`<span class="${cls}" title="${d}${s && s.pct != null ? ' · ' + s.pct + '%' : ''}"><i>${Number(d.slice(8))}</i>${inner}</span>`));
+      let cls = d > t ? 'fut' : 'none';
+      if (s && s.pct != null) { elig++; const c = scoreColor(s.pct); cls = c; if (c === 'g') green++; }
+      cells += `<span class="${cls}" title="${d}${s && s.pct != null ? ' · ' + s.pct + '%' : ''}">${Number(d.slice(8))}</span>`;
     });
-    b.append(el(`<div class="sumline"><span>Green-light days</span><b>${green} <span class="muted small">/ ${elig} scored</span></b></div>`));
+    const pct = elig ? Math.round(green / elig * 100) : 0;
+    b.append(el(`<div class="gl-hero"><div class="k">🟢 Green Lights</div><div class="v">${green}<small>days</small></div></div>`));
+    b.append(el(`<div class="gl-head"><span>This Month in Lights</span><span class="muted">${monthTitle(S.ui.statMonth)}</span></div>`));
     b.append(el(`<div class="cal-dow">${DAYS.map(d => `<span>${d}</span>`).join('')}</div>`));
-    b.append(grid);
-    b.append(el('<div class="section-t">By week</div>'));
-    const l = el('<div class="list"></div>');
-    Object.keys(weeks).sort().forEach(wk => { const w = weeks[wk]; l.append(el(`<div class="li"><span class="nm">${weekTitle(wk)}</span><span class="v">${w.e ? w.g + ' / ' + w.e + ' green' : 'no scored days'}</span></div>`)); });
-    b.append(l);
-    b.append(el(`<div class="small dim" style="padding:0 4px">A day is green when its completion is at least ${S.settings.threshold}% (change in Settings). Outlined days have no due habits or are in the future.</div>`));
+    b.append(el(`<div class="gl-circles">${cells}</div>`));
+    b.append(el(`<div class="gl-pct"><div class="k">% Green Light <span class="muted">${elig ? pct + '%' : ''}</span></div><div class="track"><i style="width:${pct}%"></i><b style="left:20%"></b><b style="left:40%"></b><b style="left:60%"></b><b style="left:80%"></b></div><div class="ticks"><span style="left:20%">20</span><span style="left:40%">40</span><span style="left:60%">60</span><span style="left:80%">80</span></div></div>`));
   }
 }
-
-/* ========== Habit detail ========== */
-$('#detailBack').addEventListener('click', () => showScreen('stats'));
-function renderDetail() {
-  const h = habitById(S.ui.detailHabit); const b = $('#detailBody'); b.innerHTML = '';
-  if (!h) { $('#detailTitle').textContent = 'Habit'; b.append(el('<div class="empty">Habit not found.</div>')); return; }
-  $('#detailTitle').textContent = h.emoji + ' ' + h.name;
-  const ym = S.ui.statMonth, ws = S.ui.statWeek;
-  const ms = habitMonthStats(h, ym);
-  const wdays = weekDays(ws); let wok = 0, wdue = 0; wdays.forEach(d => { const s = habitDayStatus(h, d); if (s === 'ok') { wok++; wdue++; } else if (s === 'miss') wdue++; });
-  const sched = h.schedule.type === 'daily' ? 'Every day' : h.schedule.type === 'weekdays' ? h.schedule.days.slice().sort().map(i => DAYS[i]).join(' · ') : h.schedule.target + '× per ' + (h.schedule.type === 'weekly' ? 'week' : 'month');
-  b.append(el(`<div class="small muted">${esc(sched)} · ${{ check: 'Emoji check', time: 'Auto timestamp', value: 'Single value', count: 'Cumulative count' }[h.mode]}${h.note ? ' · ' + esc(h.note) : ''}${h.deletedAt ? ' · removed ' + h.deletedAt : ''}</div>`));
-  const tiles = el('<div class="tiles"></div>');
-  tiles.append(el(`<div class="tile"><span class="k">${monthTitle(ym)}</span><span class="v">${ms.pct == null ? '—' : ms.pct + '%'}</span><span class="s">${ms.ok}${isFlex(h) ? ' done' : ' / ' + ms.due + ' days'}</span></div>`));
-  tiles.append(el(`<div class="tile"><span class="k">Week of ${weekTitle(ws).split(' – ')[0]}</span><span class="v">${wdue ? Math.round(wok / wdue * 100) + '%' : '—'}</span><span class="s">${wok}${isFlex(h) ? ' done' : ' / ' + wdue}</span></div>`));
-  if (h.streak) tiles.append(el(`<div class="tile"><span class="k">Streak</span><span class="v" style="color:var(--streak)">🔥 ${currentStreak(h)}</span><span class="s">longest ${longestStreak(h)}</span></div>`));
-  else tiles.append(el(`<div class="tile"><span class="k">Streak</span><span class="v muted">off</span><span class="s">enable in Edit</span></div>`));
-  b.append(tiles);
-  if (isFlex(h)) { const p = periodProgress(h, todayStr()); b.append(el(`<div class="sumline"><span>Current ${h.schedule.type === 'weekly' ? 'week' : 'month'} goal</span><b>${p.n} / ${p.target}</b></div>`)); }
-  // numeric chart
-  if (h.mode === 'value' || h.mode === 'count') {
-    const seg = el(`<div class="seg" style="max-width:220px"><button data-v="week" class="${S.ui.detailRange === 'week' ? 'on' : ''}">Week</button><button data-v="month" class="${S.ui.detailRange === 'month' ? 'on' : ''}">Month</button><button data-v="3m" class="${S.ui.detailRange === '3m' ? 'on' : ''}">3 months</button></div>`);
-    seg.querySelectorAll('button').forEach(x => x.addEventListener('click', () => { S.ui.detailRange = x.dataset.v; renderDetail(); }));
-    b.append(seg);
-    const r = S.ui.detailRange; let days;
-    if (r === 'week') days = wdays; else if (r === 'month') days = monthDays(ym); else { const end = monthDays(ym).slice(-1)[0]; const start = addMonths(ym, -2) + '-01'; days = []; let d = start; while (d <= end) { days.push(d); d = addDays(d, 1); } }
-    const pts = days.filter(d => d <= todayStr()).map(d => { const l = getLog(h.id, d); const v = h.mode === 'value' ? (l && l.value != null ? l.value : null) : (l && l.total != null ? l.total : null); return { d, v }; });
-    const vals = pts.filter(p => p.v != null).map(p => p.v);
-    const avg = vals.length ? vals.reduce((a, c) => a + c, 0) / vals.length : null;
-    const fmt = v => h.mode === 'value' ? fmtValue(h, v) : fmtNum(v) + (h.count.unit ? ' ' + h.count.unit : '');
-    const target = h.mode === 'value' ? h.value.target : h.count.target;
-    const canvas = el('<canvas class="chart" aria-label="Chart"></canvas>');
-    b.append(canvas);
-    requestAnimationFrame(() => drawChart(canvas, pts, { bar: h.mode === 'count', target, fmt, timeFmt: h.mode === 'value' && h.value.format === 'time', durFmt: h.mode === 'value' && h.value.format === 'duration' }));
-    const trend = trendText(pts, h, fmt);
-    const met = target != null ? vals.filter(v => h.mode === 'count' ? v >= target : meetsTarget(h, v)).length : null;
-    b.append(el(`<div class="tiles"><div class="tile"><span class="k">Average</span><span class="v" style="font-size:18px">${avg == null ? '—' : esc(fmt(avg))}</span><span class="s">${vals.length} entr${vals.length === 1 ? 'y' : 'ies'}</span></div><div class="tile"><span class="k">${h.mode === 'count' ? 'Total' : 'Latest'}</span><span class="v" style="font-size:18px">${vals.length ? esc(fmt(h.mode === 'count' ? vals.reduce((a, c) => a + c, 0) : vals[vals.length - 1])) : '—'}</span><span class="s">${h.mode === 'count' ? 'in range' : pts.filter(p => p.v != null).slice(-1).map(p => p.d)[0] || ''}</span></div><div class="tile"><span class="k">${target != null ? 'Target met' : 'Trend'}</span><span class="v" style="font-size:18px">${target != null ? met + '/' + vals.length : esc(trend)}</span><span class="s">${target != null ? esc(fmt(target)) : 'vs. earlier half'}</span></div></div>`));
-    if (target != null) b.append(el(`<div class="small dim">${esc(trend)} · dashed line = target. Missing days are left blank, not counted as zero.</div>`));
-  }
-  // calendar history
-  b.append(el('<div class="section-t">History</div>'));
-  const nav = pnav(monthTitle(ym), () => { S.ui.statMonth = addMonths(S.ui.statMonth, -1); renderDetail(); }, () => { S.ui.statMonth = addMonths(S.ui.statMonth, 1); renderDetail(); });
-  b.append(nav);
-  const days = monthDays(ym); const first = dow(days[0]);
-  const grid = el('<div class="gl-grid"></div>');
-  for (let i = 0; i < first; i++) grid.append(el('<span class="blank"></span>'));
-  days.forEach(d => { const s = habitDayStatus(h, d); const l = getLog(h.id, d); let txt = s === 'ok' ? '✓' : ''; if (l && h.mode === 'value' && l.value != null) txt = `<small style="font-size:9px">${esc(fmtValue(h, l.value).split(' ')[0])}</small>`; if (l && h.mode === 'count' && l.total) txt = `<small style="font-size:9px">${fmtNum(l.total)}</small>`; grid.append(el(`<span class="${s === 'ok' ? 'ok' : s === 'miss' ? '' : 'na'}" title="${d}"><i>${Number(d.slice(8))}</i>${txt}</span>`)); });
-  b.append(el(`<div class="cal-dow">${DAYS.map(d => `<span>${d}</span>`).join('')}</div>`));
-  b.append(grid);
-  // log list
-  const L = S.logs[h.id] || {}; const keys = Object.keys(L).filter(d => d.startsWith(ym)).sort().reverse();
-  if (keys.length) {
-    b.append(el('<div class="section-t">Entries</div>'));
-    const l = el('<div class="list"></div>');
-    keys.forEach(d => { const e = L[d]; let v = ''; if (h.mode === 'value' && e.value != null) v = fmtValue(h, e.value); else if (h.mode === 'count') v = fmtNum(e.total || 0) + '/' + fmtNum(h.count.target); else if (h.mode === 'time' && e.at) v = fmtTime(e.at); else v = e.done ? 'done' : '—'; l.append(el(`<div class="li"><span class="nm">${d}</span><span class="v">${esc(v)}</span></div>`)); });
-    b.append(l);
-  }
-}
-function trendText(pts, h, fmt) {
-  const v = pts.filter(p => p.v != null).map(p => p.v); if (v.length < 4) return 'Not enough data';
-  const half = Math.floor(v.length / 2); const a = v.slice(0, half), c = v.slice(half);
-  const ma = a.reduce((x, y) => x + y, 0) / a.length, mc = c.reduce((x, y) => x + y, 0) / c.length; const d = mc - ma;
-  if (Math.abs(d) < 1e-9) return 'Flat';
-  const unitless = h.mode === 'value' && h.value.format !== 'number';
-  return (d > 0 ? '▲ ' : '▼ ') + (unitless ? (h.value.format === 'time' ? Math.round(Math.abs(d)) + ' min' : fmtDuration(Math.abs(d))) : fmtNum(Math.abs(d)) + (h.mode === 'value' ? (h.value.unit ? ' ' + h.value.unit : '') : (h.count.unit ? ' ' + h.count.unit : '')));
-}
-function drawChart(canvas, pts, o) {
-  const dpr = window.devicePixelRatio || 1; const W = canvas.clientWidth || 340, H = 190;
-  canvas.width = W * dpr; canvas.height = H * dpr; const ctx = canvas.getContext('2d'); ctx.scale(dpr, dpr);
-  const cs = getComputedStyle(document.documentElement);
-  const col = n => cs.getPropertyValue(n).trim();
-  const pl = 44, pr = 12, pt = 14, pb = 26; const iw = W - pl - pr, ih = H - pt - pb;
-  const vals = pts.filter(p => p.v != null).map(p => p.v);
-  if (!vals.length) { ctx.fillStyle = col('--muted'); ctx.font = '13px ' + col('--font'); ctx.textAlign = 'center'; ctx.fillText('No entries in this range', W / 2, H / 2); return; }
-  let lo = Math.min(...vals), hi = Math.max(...vals);
-  if (o.target != null) { lo = Math.min(lo, o.target); hi = Math.max(hi, o.target); }
-  if (o.bar) lo = 0;
-  if (hi === lo) { hi += 1; lo -= o.bar ? 0 : 1; }
-  const padV = (hi - lo) * 0.12; if (!o.bar) { lo -= padV; } hi += padV;
-  const y = v => pt + ih - (v - lo) / (hi - lo) * ih;
-  const n = pts.length; const x = i => pl + (n === 1 ? iw / 2 : i / (n - 1) * iw);
-  // grid + y labels
-  ctx.strokeStyle = col('--line'); ctx.lineWidth = 1; ctx.fillStyle = col('--muted'); ctx.font = '10px ' + col('--font'); ctx.textAlign = 'right'; ctx.textBaseline = 'middle';
-  const ticks = 4;
-  for (let i = 0; i <= ticks; i++) { const v = lo + (hi - lo) * i / ticks; const yy = y(v); ctx.beginPath(); ctx.moveTo(pl, yy); ctx.lineTo(W - pr, yy); ctx.stroke(); ctx.fillText(o.timeFmt ? fmtMinutes(v).replace(' ', '') : o.durFmt ? (Math.round(v / 6) / 10) + 'h' : fmtNum(v, Math.abs(hi - lo) < 10 ? 1 : 0), pl - 6, yy); }
-  // x labels
-  ctx.textAlign = 'center'; ctx.textBaseline = 'top';
-  const step = Math.max(1, Math.ceil(n / 7));
-  pts.forEach((p, i) => { if (i % step === 0 || i === n - 1) { const d = parseDate(p.d); ctx.fillText(n <= 7 ? DAYS[d.getDay()] : MONTHS_S[d.getMonth()] + ' ' + d.getDate(), x(i), pt + ih + 8); } });
-  // target
-  if (o.target != null) { ctx.save(); ctx.setLineDash([4, 4]); ctx.strokeStyle = col('--sage'); ctx.beginPath(); ctx.moveTo(pl, y(o.target)); ctx.lineTo(W - pr, y(o.target)); ctx.stroke(); ctx.restore(); }
-  const accent = col('--accent');
-  if (o.bar) {
-    const bw = Math.max(3, Math.min(22, iw / n * 0.6));
-    pts.forEach((p, i) => { if (p.v == null) return; const met = o.target != null && p.v >= o.target; ctx.fillStyle = met ? accent : col('--sage'); ctx.globalAlpha = met ? 1 : 0.55; const yy = y(p.v); ctx.beginPath(); ctx.roundRect ? ctx.roundRect(x(i) - bw / 2, yy, bw, pt + ih - yy, 3) : ctx.rect(x(i) - bw / 2, yy, bw, pt + ih - yy); ctx.fill(); ctx.globalAlpha = 1; });
-  } else {
-    ctx.strokeStyle = accent; ctx.lineWidth = 2; ctx.lineJoin = 'round'; ctx.beginPath(); let started = false;
-    pts.forEach((p, i) => { if (p.v == null) { return; } const xx = x(i), yy = y(p.v); if (!started) { ctx.moveTo(xx, yy); started = true; } else ctx.lineTo(xx, yy); });
-    ctx.stroke();
-    // area
-    ctx.save(); ctx.globalAlpha = 0.12; ctx.fillStyle = accent; ctx.beginPath(); let first = null, last = null;
-    pts.forEach((p, i) => { if (p.v == null) return; if (first == null) { first = i; ctx.moveTo(x(i), y(p.v)); } else ctx.lineTo(x(i), y(p.v)); last = i; });
-    if (first != null) { ctx.lineTo(x(last), pt + ih); ctx.lineTo(x(first), pt + ih); ctx.closePath(); ctx.fill(); } ctx.restore();
-    pts.forEach((p, i) => { if (p.v == null) return; ctx.fillStyle = col('--card'); ctx.strokeStyle = accent; ctx.lineWidth = 2; ctx.beginPath(); ctx.arc(x(i), y(p.v), i === n - 1 || n <= 31 ? 3 : 2, 0, Math.PI * 2); ctx.fill(); ctx.stroke(); });
-    // emphasize last point value
-    const lastIdx = pts.map((p, i) => p.v != null ? i : -1).filter(i => i >= 0).pop();
-    if (lastIdx != null) { ctx.fillStyle = col('--fg'); ctx.font = 'bold 11px ' + col('--font'); ctx.textAlign = lastIdx > n * 0.7 ? 'right' : 'left'; ctx.textBaseline = 'bottom'; ctx.fillText(o.fmt(pts[lastIdx].v), x(lastIdx) + (lastIdx > n * 0.7 ? -6 : 6), y(pts[lastIdx].v) - 4); }
-  }
-}
-
 /* ========== Boot ========== */
 async function boot() {
   await Store.open();

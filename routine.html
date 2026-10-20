@@ -21,7 +21,7 @@
   --red:#E0655A; --yellow:#E3B23C; --green:#5DBE7F; --neutral:#2E343A;
   --streak:#F0A04B; --streak-bg:#2A2016;
   --font:-apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",Roboto,"Helvetica Neue",Arial,"Noto Sans KR",sans-serif;
-  --radius:14px; --nav-h:54px; --nav-pad:max(4px,calc(env(safe-area-inset-bottom,0px) * 0.2));
+  --radius:14px; --nav-h:54px; --nav-pad:max(2px,calc(env(safe-area-inset-bottom,0px) * 0.06));
   color-scheme:dark;
 }
 *{box-sizing:border-box}
@@ -92,15 +92,15 @@ nav.tabbar svg{width:24px;height:24px}
 
 /* Habit table */
 .table{border:1px solid var(--line);border-radius:12px;overflow:hidden;background:var(--panel)}
-.hrow{display:grid;grid-template-columns:30px 84px minmax(0,1fr) 62px;align-items:stretch;border-top:1px solid var(--line);min-height:58px;position:relative;background:var(--panel);transition:background .15s}
+.hrow{-webkit-touch-callout:none;user-select:none;-webkit-user-select:none;display:grid;grid-template-columns:30px 84px minmax(0,1fr) 62px;align-items:stretch;border-top:1px solid var(--line);min-height:58px;position:relative;background:var(--panel);transition:background .15s}
 .hrow:first-child{border-top:0}
-.hrow.dragging{opacity:.35}
+.hrow.dragging{opacity:.5;background:var(--card-2);box-shadow:0 0 0 1.5px var(--accent) inset}
 .hrow.drop-before{box-shadow:inset 0 2px 0 var(--accent)}
 .hrow.drop-after{box-shadow:inset 0 -2px 0 var(--accent)}
 .hrow.done{background:var(--panel)}
 .hrow.done .nm{color:var(--muted)}
 .hrow.flex-skip .nm{color:var(--fg)}
-.c-num{display:flex;align-items:center;justify-content:center;color:var(--dim);font-size:13px;font-variant-numeric:tabular-nums;border-right:1px solid var(--line);touch-action:none;user-select:none;-webkit-user-select:none;cursor:grab}
+.c-num{display:flex;align-items:center;justify-content:center;color:var(--dim);font-size:13px;font-variant-numeric:tabular-nums;border-right:1px solid var(--line);cursor:grab}
 .c-note{display:flex;align-items:center;padding:8px 8px;font-size:13px;color:var(--muted);border-right:1px solid var(--line);line-height:1.25;overflow-wrap:anywhere}
 .c-name{display:flex;align-items:center;gap:8px;padding:8px 8px 8px 10px;min-width:0;text-align:left;border-right:1px solid var(--line)}
 .c-name .em{font-size:19px;line-height:1;flex:0 0 auto}
@@ -255,7 +255,13 @@ nav.tabbar svg{width:24px;height:24px}
 .mcal span.fut{color:var(--dim)}
 .mcal span.ok{background:var(--green);color:#0b2416;font-weight:700}
 .mcal span.blank{background:transparent}
-.mcal span b{font-weight:700;font-size:9px;letter-spacing:-.2px}
+.mcal span.num{position:relative}
+.mcal span.num i{position:absolute;top:1px;left:3px;font-size:6.5px;font-style:normal;font-weight:500;color:var(--dim);line-height:1}
+.mcal span.ok i{color:rgba(0,0,0,.55)}
+.mcal span b{font-weight:700;font-size:9px;letter-spacing:-.2px;padding-top:3px;max-width:100%;overflow:hidden;white-space:nowrap;display:flex;flex-direction:column;align-items:center;line-height:1.05}
+.mcal span b.two{font-size:8px}
+.mcal span b u{text-decoration:none;font-size:6px;font-weight:600;opacity:.8;margin-top:1px}
+@media (max-width:380px){.mcal span b{font-size:8px}.mcal span b.two{font-size:7px}}
 .mcal span b.sm{font-size:7.5px;letter-spacing:-.3px}
 .mcal span:not(.ok) b{color:var(--fg)}
 .mcard .ft{display:flex;align-items:center;justify-content:space-around;font-size:14px;font-weight:600;font-variant-numeric:tabular-nums;padding-top:2px}
@@ -277,6 +283,9 @@ nav.tabbar svg{width:24px;height:24px}
 .wrow .c.ok{background:var(--green);color:#0b2416}
 .wrow .c.na{background:transparent;box-shadow:inset 0 0 0 1px var(--line)}
 .wrow .c.t8{font-size:8px;letter-spacing:-.3px}
+.wrow .c b{font-weight:700;max-width:100%;overflow:hidden;white-space:nowrap;display:flex;flex-direction:column;align-items:center;line-height:1.05}
+.wrow .c b.two{font-size:8px}
+.wrow .c b u{text-decoration:none;font-size:6px;font-weight:600;opacity:.8;margin-top:1px}
 .gl-hero{display:flex;flex-direction:column;align-items:center;gap:2px;padding:14px 0 8px;border-bottom:1px solid var(--line)}
 .gl-hero .k{font-size:15px;font-weight:600}
 .gl-hero .v{font-size:40px;font-weight:700;font-variant-numeric:tabular-nums;display:flex;align-items:baseline;gap:6px}
@@ -827,13 +836,12 @@ function deleteHabitSheet(h) {
   Sheet.open('Delete habit', body, { cancelLabel: 'Cancel' });
 }
 
-/* ========== Drag reorder (long-press on number cell) ========== */
+/* ========== Drag reorder (long-press anywhere on the row) ========== */
 function attachDrag(row, h) {
-  const handle = row.querySelector('.c-num');
-  let timer = null, dragging = false, startY = 0, ph = null;
+  let timer = null, dragging = false, startX = 0, startY = 0, pid = null;
+  const blockTouch = e => { if (dragging) e.preventDefault(); };
   const onMove = e => {
-    if (!dragging) { if (Math.abs(e.clientY - startY) > 8) { clearTimeout(timer); cleanup(); } return; }
-    e.preventDefault();
+    if (!dragging) { if (Math.abs(e.clientY - startY) > 10 || Math.abs(e.clientX - startX) > 10) cleanup(); return; }
     const under = document.elementFromPoint(e.clientX, e.clientY);
     const target = under && under.closest('.hrow');
     $$('.hrow').forEach(r => r.classList.remove('drop-before', 'drop-after'));
@@ -847,23 +855,27 @@ function attachDrag(row, h) {
         const rect = target.getBoundingClientRect(); const before = e.clientY < rect.top + rect.height / 2;
         const ids = $$('.hrow').map(r => r.dataset.id).filter(id => id !== h.id);
         const idx = ids.indexOf(target.dataset.id); ids.splice(before ? idx : idx + 1, 0, h.id);
-        // apply order: keep habits not visible in their relative positions
         const vis = new Set(ids); const all = activeHabits();
         const merged = []; let vi = 0;
-        all.forEach(x => { if (vis.has(x.id)) { while (vi < ids.length && merged.includes(habitById(ids[vi]))) vi++; merged.push(habitById(ids[vi++])); } else merged.push(x); });
+        all.forEach(x => { if (vis.has(x.id)) { merged.push(habitById(ids[vi++])); } else merged.push(x); });
         merged.forEach((x, i) => { x.order = i; });
         persist('habits'); haptic(10);
       }
+      row.dataset.justDragged = '1'; setTimeout(() => { delete row.dataset.justDragged; }, 400);
       renderTable();
     }
     cleanup();
   };
-  const cleanup = () => { clearTimeout(timer); dragging = false; row.classList.remove('dragging'); $$('.hrow').forEach(r => r.classList.remove('drop-before', 'drop-after')); window.removeEventListener('pointermove', onMove); window.removeEventListener('pointerup', onUp); window.removeEventListener('pointercancel', onUp); };
-  handle.addEventListener('pointerdown', e => {
-    startY = e.clientY; e.preventDefault();
-    window.addEventListener('pointermove', onMove, { passive: false }); window.addEventListener('pointerup', onUp); window.addEventListener('pointercancel', onUp);
-    timer = setTimeout(() => { dragging = true; row.classList.add('dragging'); haptic(15); try { handle.setPointerCapture(e.pointerId); } catch (x) {} }, 220);
+  const cleanup = () => { clearTimeout(timer); dragging = false; row.classList.remove('dragging'); $$('.hrow').forEach(r => r.classList.remove('drop-before', 'drop-after')); window.removeEventListener('pointermove', onMove); window.removeEventListener('pointerup', onUp); window.removeEventListener('pointercancel', onUp); window.removeEventListener('touchmove', blockTouch); };
+  row.addEventListener('pointerdown', e => {
+    if (e.target.closest('.c-log')) return; // the log button never starts a drag
+    startX = e.clientX; startY = e.clientY; pid = e.pointerId;
+    window.addEventListener('pointermove', onMove); window.addEventListener('pointerup', onUp); window.addEventListener('pointercancel', onUp);
+    window.addEventListener('touchmove', blockTouch, { passive: false });
+    timer = setTimeout(() => { dragging = true; row.classList.add('dragging'); haptic(15); try { row.setPointerCapture(pid); } catch (x) {} }, 350);
   });
+  // a tap that ended a drag must not open the menu
+  row.addEventListener('click', e => { if (row.dataset.justDragged || dragging) { e.stopPropagation(); e.preventDefault(); } }, true);
 }
 
 /* ========== Month calendar sheet ========== */
@@ -1007,11 +1019,7 @@ function settingsSheet() {
     <div class="field"><span class="lbl">Completed habits on Home</span><div class="seg" id="sBeh"><button data-v="bottom">Move to bottom</button><button data-v="hide">Hide</button><button data-v="stay">Keep in place</button></div></div>
     <div class="field"><span class="lbl">Tags</span><div class="list" id="sTags"></div><button class="btn" id="sTagAdd">+ New tag</button></div>
     <div class="field"><span class="lbl">How scoring works</span><div class="note-box">Daily and selected-day habits count toward each day they are due. <b>Times-per-week</b> and <b>times-per-month</b> goals appear every day but only count toward a day when completed that day, so skipped days never lower the score. Cumulative habits count as done when the target is reached (or when any amount is logged, if you chose that). Streaks follow each habit’s own schedule.</div></div>
-    <div class="field"><span class="lbl">Backup &amp; restore</span><div class="note-box">Data is saved <b>on this device only</b> (IndexedDB in Safari). Backups are <b>manual</b>: export a JSON file and keep it in iCloud Drive or Files. Restore it on any device with Import. Last export: <b id="sLast">${s.lastBackup ? esc(new Date(s.lastBackup).toLocaleString()) : 'never'}</b></div>
-      <div class="two"><button class="btn primary" id="sExport">Export JSON</button><button class="btn" id="sCsv">Export CSV</button></div>
-      <button class="btn block file-btn" id="sImport">Import JSON backup<input type="file" accept="application/json,.json" aria-label="Import backup"></button>
-      <button class="btn block" id="sCopy">Copy JSON to clipboard</button></div>
-    <div class="field"><span class="lbl">About</span><div class="note-box">Add to Home Screen from Safari’s share menu for an app-like experience. Notifications and background sync are not available in a web app on iPhone; open the app to log.</div></div>
+    <div class="field"><span class="lbl">About</span><div class="note-box">Add to Home Screen from Safari’s share menu for an app-like experience.</div></div>
   </div>`);
   body.querySelector('#sThr').addEventListener('input', e => { s.threshold = Number(e.target.value); body.querySelector('#sThrV').textContent = s.threshold + '%'; persist('settings'); });
   body.querySelectorAll('#sBeh button').forEach(b => { b.classList.toggle('on', b.dataset.v === s.completedBehavior); b.addEventListener('click', () => { s.completedBehavior = b.dataset.v; persist('settings'); body.querySelectorAll('#sBeh button').forEach(x => x.classList.toggle('on', x === b)); }); });
@@ -1029,10 +1037,6 @@ function settingsSheet() {
   };
   drawTags();
   body.querySelector('#sTagAdd').addEventListener('click', () => { S.tags.push({ id: uid(), name: 'New tag', emoji: '' }); persist('tags'); drawTags(); const last = body.querySelectorAll('#sTags .li input')[S.tags.length * 2 - 1]; if (last) { last.focus(); last.select(); } });
-  body.querySelector('#sExport').addEventListener('click', () => exportJSON(body));
-  body.querySelector('#sCsv').addEventListener('click', () => exportCSV());
-  body.querySelector('#sCopy').addEventListener('click', () => { const txt = JSON.stringify(exportData(), null, 1); try { navigator.clipboard.writeText(txt).then(() => toast('Backup JSON copied'), () => toast('Clipboard blocked here. Use Export instead.')); } catch (e) { toast('Clipboard blocked here. Use Export instead.'); } });
-  body.querySelector('#sImport input').addEventListener('change', e => { const f = e.target.files[0]; if (!f) return; const r = new FileReader(); r.onload = () => importJSON(r.result); r.readAsText(f); });
   Sheet.open('Settings', body, { onClose: () => { renderHome(); } });
 }
 function exportData() { return { app: 'my-routines', version: 1, exportedAt: new Date().toISOString(), settings: S.settings, tags: S.tags, habits: S.habits, logs: S.logs }; }
@@ -1149,15 +1153,16 @@ function habitDayStatus(h, d) {
 /* what to print inside a day cell: value for numeric/time modes, ✓ for checks */
 function cellText(h, d) {
   const l = getLog(h.id, d);
-  if (h.mode === 'time') return l && l.done && l.at ? { txt: fmtTime(l.at).replace(' ', ''), small: true } : null;
-  if (h.mode === 'value') { if (!l || l.value == null) return null; const f = h.value.format; const s = f === 'time' ? fmtMinutes(l.value).replace(' ', '') : f === 'duration' ? fmtDuration(l.value).replace(' ', '') : fmtNum(l.value); return { txt: s, small: s.length > 4 }; }
+  const split = t => { const [a, b] = t.split(' '); return { txt: a, sub: b || '', small: a.length > 4 }; };
+  if (h.mode === 'time') return l && l.done && l.at ? split(fmtTime(l.at)) : null;
+  if (h.mode === 'value') { if (!l || l.value == null) return null; const f = h.value.format; if (f === 'time') return split(fmtMinutes(l.value)); const s = f === 'duration' ? fmtDuration(l.value).replace(' ', '') : fmtNum(l.value); return { txt: s, small: s.length > 4 }; }
   if (h.mode === 'count') return l && l.total ? { txt: fmtNum(l.total), small: String(fmtNum(l.total)).length > 4 } : null;
   return null;
 }
 function dayCell(h, d, cls) {
   const s = habitDayStatus(h, d); const c = cellText(h, d);
   const klass = s === 'ok' ? 'ok' : s === 'miss' ? '' : 'na';
-  const inner = c ? esc(c.txt) : (s === 'ok' ? '✓' : '');
+  const inner = c ? `<b class="${c.sub ? 'two' : ''}">${esc(c.txt)}${c.sub ? `<u>${esc(c.sub)}</u>` : ''}</b>` : (s === 'ok' ? '✓' : '');
   return `<span class="${klass}${c && c.small ? ' ' + cls : ''}" title="${d}"><i>${Number(d.slice(8))}</i>${inner}</span>`;
 }
 function habitMonthStats(h, ym) {
@@ -1175,8 +1180,8 @@ function monthBlock(h, ym) {
   days.forEach(d => {
     const s = habitDayStatus(h, d); const c = cellText(h, d); const n = Number(d.slice(8));
     const klass = s === 'ok' ? 'ok' : s === 'na' ? 'na' : s === 'future' ? 'fut' : '';
-    const inner = c ? `<b class="${c.small ? 'sm' : ''}">${esc(c.txt)}</b>` : (s === 'na' ? '–' : String(n));
-    cells += `<span class="${klass}" title="${d}${c ? ' · ' + esc(c.txt) : ''}">${inner}</span>`;
+    const inner = (s === 'na' ? '' : `<i>${n}</i>`) + (c ? `<b class="${c.small ? 'sm' : ''}${c.sub ? ' two' : ''}">${esc(c.txt)}${c.sub ? `<u>${esc(c.sub)}</u>` : ''}</b>` : (s === 'na' ? '–' : s === 'ok' ? '<b>✓</b>' : ''));
+    cells += `<span class="${klass} num" title="${d}${c ? ' · ' + esc(c.txt) : ''}">${inner}</span>`;
   });
   return el(`<div class="mcard"><div class="t"><span>${esc(h.emoji)}</span><span class="nm">${esc(h.name)}</span></div><div class="mcal">${cells}</div><div class="ft"><span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="8"/><path d="M8.5 12l2.5 2.5 4.5-5"/></svg>${cntTxt} <small>days</small>${h.streak && !h.deletedAt && currentStreak(h) > 0 ? ` <em>🔥${currentStreak(h)}</em>` : ''}</span></div></div>`);
 }

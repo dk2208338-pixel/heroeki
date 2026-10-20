@@ -45,7 +45,8 @@ h1,h2,h3{margin:0;text-wrap:balance}
 .ellip{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 
 /* App frame */
-#app{height:100%;display:flex;flex-direction:column;padding-left:max(0px,env(safe-area-inset-left,0px));padding-right:max(0px,env(safe-area-inset-right,0px))}
+#app{position:fixed;inset:0;display:flex;flex-direction:column;padding-top:env(safe-area-inset-top,0px);padding-left:max(0px,env(safe-area-inset-left,0px));padding-right:max(0px,env(safe-area-inset-right,0px))}
+html{overflow:hidden;position:fixed;inset:0;width:100%}
 .screen{flex:1;min-height:0;display:none;flex-direction:column}
 .screen.active{display:flex}
 .scroll{flex:1;min-height:0;overflow-y:auto;-webkit-overflow-scrolling:touch;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:0 calc(var(--nav-h) + 90px + env(safe-area-inset-bottom,0px))}
@@ -1071,7 +1072,6 @@ function renderStats() {
     const grid = el('<div class="cards2"></div>'); hs.forEach(h => grid.append(habitCard(h, days, S.ui.statMonth))); b.append(grid);
     let green = 0, elig = 0; days.forEach(d => { if (d > todayStr()) return; const s = dayScore(d); if (s.pct != null) { elig++; if (s.pct >= S.settings.threshold) green++; } });
     b.append(el(`<div class="sumline"><span>Green-check days this month</span><b>${green} <span class="muted small">/ ${elig}</span></b></div>`));
-    b.append(el(`<div class="small dim" style="padding:0 4px">✓ met · gray box = missed · outlined = not scheduled, future, or completed-elsewhere for weekly/monthly goals.</div>`));
   }
   if (tab === 'weekly') {
     b.append(pnav(weekTitle(S.ui.statWeek), () => { S.ui.statWeek = addDays(S.ui.statWeek, -7); renderStats(); }, () => { S.ui.statWeek = addDays(S.ui.statWeek, 7); renderStats(); }));

@@ -21,7 +21,7 @@
   --red:#E0655A; --yellow:#E3B23C; --green:#5DBE7F; --neutral:#2E343A;
   --streak:#F0A04B; --streak-bg:#2A2016;
   --font:-apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",Roboto,"Helvetica Neue",Arial,"Noto Sans KR",sans-serif;
-  --radius:14px; --nav-h:54px; --nav-pad:max(6px,calc(env(safe-area-inset-bottom,0px) * 0.45));
+  --radius:14px; --nav-h:54px; --nav-pad:max(4px,calc(env(safe-area-inset-bottom,0px) * 0.2));
   color-scheme:dark;
 }
 *{box-sizing:border-box}
@@ -58,7 +58,8 @@ nav.tabbar svg{width:24px;height:24px}
 
 /* Header */
 .hdr{display:flex;align-items:center;justify-content:space-between;gap:8px;min-height:44px}
-.month-btn{display:flex;align-items:center;gap:6px;font-size:22px;font-weight:700;letter-spacing:-.2px;min-height:44px;padding:0 4px;border-radius:10px}
+.month-btn{display:flex;align-items:center;gap:6px;font-size:22px;font-weight:700;letter-spacing:-.2px;min-height:44px;padding:0;border-radius:10px;line-height:1.2}
+.hdr h1{font-size:22px;font-weight:700;letter-spacing:-.2px;min-height:44px;display:flex;align-items:center;line-height:1.2}
 .month-btn svg{width:18px;height:18px;color:var(--muted)}
 .icon-btn{width:40px;height:40px;border-radius:12px;display:inline-flex;align-items:center;justify-content:center;color:var(--fg);background:var(--card)}
 .icon-btn svg{width:20px;height:20px}
@@ -335,8 +336,6 @@ nav.tabbar svg{width:24px;height:24px}
         <button class="month-btn" id="monthBtn" aria-label="Open calendar"><span id="monthLbl">October 2026</span>
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button>
         <div class="row">
-          <span class="chip streak" id="todayStreakChip" title="Green-light day streak">🔥 <span id="glStreak">0</span></span>
-          <button class="icon-btn ghost" id="todayBtn" aria-label="Go to today"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></button>
           <button class="icon-btn ghost" id="settingsBtn" aria-label="Settings"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="5" cy="12" r="1.6"/><circle cx="12" cy="12" r="1.6"/><circle cx="19" cy="12" r="1.6"/></svg></button>
         </div>
       </div>
@@ -355,7 +354,7 @@ nav.tabbar svg{width:24px;height:24px}
   <!-- STATS -->
   <section class="screen" id="scr-stats">
     <div class="top">
-      <div class="hdr"><h1 style="font-size:22px;font-weight:700">Statistics</h1></div>
+      <div class="hdr"><h1>Statistics</h1></div>
       <div class="tabs" id="statTabs"><button data-t="monthly" class="on">Monthly</button><button data-t="weekly">Weekly</button><button data-t="green">Green Light</button></div>
     </div>
     <div class="scroll" id="statsScroll"><div id="statsBody" style="display:flex;flex-direction:column;gap:12px"></div></div>
@@ -616,7 +615,6 @@ function renderHome() { renderHeader(); renderWeek(); renderFilters(); renderTab
 function renderHeader() {
   const d = parseDate(S.ui.date);
   $('#monthLbl').textContent = MONTHS[d.getMonth()] + ' ' + d.getFullYear();
-  $('#glStreak').textContent = greenStreak();
 }
 function ringSVG(date, size) {
   const habits = activeHabitsOn(date).filter(h => isScheduled(h, date));
@@ -898,7 +896,6 @@ $('#monthBtn').addEventListener('click', () => {
   const cal = monthCalendar(monthKey(S.ui.date), S.ui.date, ds => { S.ui.date = ds; S.ui.weekStart = weekStart(ds); Sheet.close(); renderHome(); });
   Sheet.open('Pick a date', cal);
 });
-$('#todayBtn').addEventListener('click', () => { S.ui.date = todayStr(); S.ui.weekStart = weekStart(S.ui.date); renderHome(); });
 $('#fab').addEventListener('click', () => habitForm(null));
 /* ========== Habit form ========== */
 const EMOJIS = ['✅', '☀️', '🌙', '💧', '🥛', '💛', '💪', '🏃', '🚶', '🧘', '🛏️', '📖', '📚', '✍️', '💊', '🥗', '🍎', '🚭', '🧹', '🪥', '🧴', '🎯', '💰', '🎹', '🎨', '🧠', '📵', '🙏', '🌱', '⏰', '🧊', '🔥'];

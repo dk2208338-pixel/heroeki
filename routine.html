@@ -260,8 +260,9 @@ nav.tabbar svg{width:22px;height:22px}
 .mcal span.num i{position:absolute;top:1px;left:2px;font-size:5.5px;font-style:normal;font-weight:500;color:var(--dim);line-height:1}
 .mcal span.ok i{color:rgba(0,0,0,.55)}
 .mcal span b{font-weight:700;font-size:9px;letter-spacing:-.2px;padding-top:4px;max-width:100%;overflow:hidden;white-space:nowrap;line-height:1}
-.mcal span b.sm{font-size:4.6px;letter-spacing:-.35px;font-weight:600;padding-top:5px;max-width:95%}
-@media (max-width:380px){.mcal span b{font-size:8px}.mcal span b.sm{font-size:4.3px}}
+.mcal span svg.ft{position:absolute;left:7%;right:7%;top:38%;width:86%;height:48%;fill:currentColor;overflow:visible}
+.mcal span.ok svg.ft{fill:#0b2416}
+@media (max-width:380px){.mcal span b{font-size:8px}}
 .mcal span b.sm{font-size:7.5px;letter-spacing:-.3px}
 .mcal span:not(.ok) b{color:var(--fg)}
 .mcard .ft{display:flex;align-items:center;justify-content:space-around;font-size:14px;font-weight:600;font-variant-numeric:tabular-nums;padding-top:2px}
@@ -280,7 +281,7 @@ nav.tabbar svg{width:22px;height:22px}
 .wrow .c{width:20px;height:20px;margin:0 auto;border-radius:5px;background:var(--neutral);display:flex;align-items:center;justify-content:center;font-size:11px;color:var(--dim)}
 .wrow .c.ok{background:var(--green)}
 .wrow .c.na{background:transparent}
-.gl-hero{display:flex;align-items:center;justify-content:center;gap:10px;padding:8px 0 6px;border-bottom:1px solid var(--line)}
+.gl-hero{display:flex;align-items:center;justify-content:center;gap:10px;padding:0 0 6px;margin-top:-5px;border-bottom:1px solid var(--line)}
 .gl-hero .k{font-size:28px;line-height:1}
 .gl-hero .v{font-size:36px;font-weight:700;font-variant-numeric:tabular-nums;display:flex;align-items:baseline;gap:6px}
 .gl-hero .v small{font-size:16px;font-weight:500;color:var(--muted)}
@@ -1145,6 +1146,8 @@ function habitDayStatus(h, d) {
   return isDone(h, d) ? 'ok' : 'miss';
 }
 /* what to print inside a day cell: value for numeric/time modes, ✓ for checks */
+/* text that scales to fit its box: SVG ignores Safari's minimum font size */
+function fitText(txt, cls) { const n = String(txt).length; const w = Math.max(12, n * 6.2 + 2); return `<svg class="ft ${cls || ''}" viewBox="0 0 ${w} 10" preserveAspectRatio="xMidYMid meet" aria-hidden="true"><text x="${w / 2}" y="8.2" text-anchor="middle" font-size="9" font-weight="700">${esc(txt)}</text></svg>`; }
 function hm24(dt) { return pad(dt.getHours()) + ':' + pad(dt.getMinutes()); }
 function cellText(h, d, compact) {
   const l = getLog(h.id, d);
@@ -1179,7 +1182,7 @@ function monthBlock(h, ym) {
   days.forEach(d => {
     const s = habitDayStatus(h, d); const c = cellText(h, d, true); const n = Number(d.slice(8));
     const klass = s === 'ok' ? 'ok' : s === 'na' ? 'na' : s === 'future' ? 'fut' : '';
-    const inner = (s === 'na' ? '' : `<i>${n}</i>`) + (c ? `<b class="${c.small ? 'sm' : ''}${c.sub ? ' two' : ''}">${esc(c.txt)}${c.sub ? `<u>${esc(c.sub)}</u>` : ''}</b>` : (s === 'na' ? '–' : s === 'ok' ? '<b>✓</b>' : ''));
+    const inner = (s === 'na' ? '' : `<i>${n}</i>`) + (c ? fitText(c.txt) : (s === 'na' ? '–' : s === 'ok' ? '<b>✓</b>' : ''));
     cells += `<span class="${klass} num" title="${d}${c ? ' · ' + esc(c.txt) : ''}">${inner}</span>`;
   });
   return el(`<div class="mcard"><div class="t"><span>${esc(h.emoji)}</span><span class="nm">${esc(h.name)}</span></div><div class="mcal">${cells}</div><div class="ft"><span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="8"/><path d="M8.5 12l2.5 2.5 4.5-5"/></svg>${cntTxt} <small>days</small>${h.streak && !h.deletedAt && currentStreak(h) > 0 ? ` <em>🔥${currentStreak(h)}</em>` : ''}</span></div></div>`);

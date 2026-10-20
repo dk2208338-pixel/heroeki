@@ -21,7 +21,7 @@
   --red:#E0655A; --yellow:#E3B23C; --green:#5DBE7F; --neutral:#2E343A;
   --streak:#F0A04B; --streak-bg:#2A2016;
   --font:-apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",Roboto,"Helvetica Neue",Arial,"Noto Sans KR",sans-serif;
-  --radius:14px; --nav-h:54px; --nav-pad:max(2px,calc(env(safe-area-inset-bottom,0px) * 0.06));
+  --radius:14px; --nav-h:50px; --nav-pad:0px;
   color-scheme:dark;
 }
 *{box-sizing:border-box}
@@ -51,7 +51,7 @@ html{overflow:hidden;position:fixed;inset:0;width:100%}
 .screen.active{display:flex}
 .scroll{flex:1;min-height:0;overflow-y:auto;-webkit-overflow-scrolling:touch;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:0 calc(var(--nav-h) + 90px + var(--nav-pad))}
 .top{padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:10px 0}
-nav.tabbar{position:fixed;left:0;right:0;bottom:0;z-index:20;background:rgba(15,17,19,.92);backdrop-filter:saturate(1.4) blur(14px);-webkit-backdrop-filter:saturate(1.4) blur(14px);border-top:1px solid var(--line);display:flex;justify-content:space-around;padding:6px max(24px,env(safe-area-inset-left,0px)) var(--nav-pad) max(24px,env(safe-area-inset-right,0px));height:calc(var(--nav-h) + var(--nav-pad))}
+nav.tabbar{position:fixed;left:0;right:0;bottom:0;z-index:20;background:rgba(15,17,19,.92);backdrop-filter:saturate(1.4) blur(14px);-webkit-backdrop-filter:saturate(1.4) blur(14px);border-top:1px solid var(--line);display:flex;justify-content:space-around;padding:5px max(24px,env(safe-area-inset-left,0px)) 0 max(24px,env(safe-area-inset-right,0px));height:var(--nav-h)}
 nav.tabbar button{display:flex;flex-direction:column;align-items:center;gap:3px;min-width:84px;padding:4px 0;color:var(--muted);font-size:11px;font-weight:500;border-radius:10px}
 nav.tabbar button.active{color:var(--accent);font-weight:600}
 nav.tabbar svg{width:24px;height:24px}
@@ -256,12 +256,11 @@ nav.tabbar svg{width:24px;height:24px}
 .mcal span.ok{background:var(--green);color:#0b2416;font-weight:700}
 .mcal span.blank{background:transparent}
 .mcal span.num{position:relative}
-.mcal span.num i{position:absolute;top:1px;left:3px;font-size:6.5px;font-style:normal;font-weight:500;color:var(--dim);line-height:1}
+.mcal span.num i{position:absolute;top:1px;left:2px;font-size:5.5px;font-style:normal;font-weight:500;color:var(--dim);line-height:1}
 .mcal span.ok i{color:rgba(0,0,0,.55)}
-.mcal span b{font-weight:700;font-size:9px;letter-spacing:-.2px;padding-top:3px;max-width:100%;overflow:hidden;white-space:nowrap;display:flex;flex-direction:column;align-items:center;line-height:1.05}
-.mcal span b.two{font-size:8px}
-.mcal span b u{text-decoration:none;font-size:6px;font-weight:600;opacity:.8;margin-top:1px}
-@media (max-width:380px){.mcal span b{font-size:8px}.mcal span b.two{font-size:7px}}
+.mcal span b{font-weight:700;font-size:9px;letter-spacing:-.2px;padding-top:4px;max-width:100%;overflow:hidden;white-space:nowrap;line-height:1}
+.mcal span b.sm{font-size:6.5px;letter-spacing:-.3px}
+@media (max-width:380px){.mcal span b{font-size:8px}.mcal span b.sm{font-size:6px}}
 .mcal span b.sm{font-size:7.5px;letter-spacing:-.3px}
 .mcal span:not(.ok) b{color:var(--fg)}
 .mcard .ft{display:flex;align-items:center;justify-content:space-around;font-size:14px;font-weight:600;font-variant-numeric:tabular-nums;padding-top:2px}
@@ -270,22 +269,16 @@ nav.tabbar svg{width:24px;height:24px}
 .mcard .ft i{width:1px;height:16px;background:var(--line-2)}
 .mcard .ft small{font-size:12px;color:var(--muted);font-weight:500}
 .mcard .ft em{font-style:normal;font-size:11px;color:var(--streak);font-weight:700}
-.wtable{background:var(--card);border-radius:14px;overflow:hidden}
-.wrow{display:grid;grid-template-columns:minmax(0,1.25fr) repeat(7,minmax(0,1fr));align-items:center;gap:3px;padding:6px 8px;border-top:1px solid var(--line)}
-.wrow:first-child{border-top:0}
-.wrow.head{padding:8px 8px 6px;font-size:11px;color:var(--muted);font-weight:600;text-align:center}
-.wrow.head span:first-child{text-align:left}
+.wtable{background:var(--card);border-radius:14px;overflow:hidden;padding:4px 10px 6px 12px}
+.wrow{display:grid;grid-template-columns:minmax(0,1fr) repeat(7,24px);align-items:center;gap:4px;min-height:40px}
+.wrow.head{min-height:32px;font-size:12px;color:var(--muted);font-weight:600;text-align:center}
 .wrow.head .td{color:var(--fg)}
-.wrow .nm{display:flex;align-items:center;gap:4px;min-width:0;font-size:12px;font-weight:600;padding-right:4px}
-.wrow .nm .em{font-size:14px;flex:0 0 auto}
+.wrow .nm{display:flex;align-items:center;gap:6px;min-width:0;font-size:15px;font-weight:500;padding-right:6px}
+.wrow .nm .em{font-size:17px;flex:0 0 auto}
 .wrow .nm .tx{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.wrow .c{aspect-ratio:1;border-radius:7px;background:var(--neutral);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;font-variant-numeric:tabular-nums;color:var(--fg);overflow:hidden;max-height:40px}
-.wrow .c.ok{background:var(--green);color:#0b2416}
-.wrow .c.na{background:transparent;box-shadow:inset 0 0 0 1px var(--line)}
-.wrow .c.t8{font-size:8px;letter-spacing:-.3px}
-.wrow .c b{font-weight:700;max-width:100%;overflow:hidden;white-space:nowrap;display:flex;flex-direction:column;align-items:center;line-height:1.05}
-.wrow .c b.two{font-size:8px}
-.wrow .c b u{text-decoration:none;font-size:6px;font-weight:600;opacity:.8;margin-top:1px}
+.wrow .c{width:20px;height:20px;margin:0 auto;border-radius:5px;background:var(--neutral);display:flex;align-items:center;justify-content:center;font-size:11px;color:var(--dim)}
+.wrow .c.ok{background:var(--green)}
+.wrow .c.na{background:transparent}
 .gl-hero{display:flex;flex-direction:column;align-items:center;gap:2px;padding:14px 0 8px;border-bottom:1px solid var(--line)}
 .gl-hero .k{font-size:15px;font-weight:600}
 .gl-hero .v{font-size:40px;font-weight:700;font-variant-numeric:tabular-nums;display:flex;align-items:baseline;gap:6px}
@@ -1151,8 +1144,13 @@ function habitDayStatus(h, d) {
   return isDone(h, d) ? 'ok' : 'miss';
 }
 /* what to print inside a day cell: value for numeric/time modes, ✓ for checks */
-function cellText(h, d) {
+function hm24(dt) { return pad(dt.getHours()) + ':' + pad(dt.getMinutes()); }
+function cellText(h, d, compact) {
   const l = getLog(h.id, d);
+  if (compact) {
+    if (h.mode === 'time') return l && l.done && l.at ? { txt: hm24(new Date(l.at)), small: true } : null;
+    if (h.mode === 'value' && h.value.format === 'time') return l && l.value != null ? { txt: pad(Math.floor(l.value / 60) % 24) + ':' + pad(l.value % 60), small: true } : null;
+  }
   const split = t => { const [a, b] = t.split(' '); return { txt: a, sub: b || '', small: a.length > 4 }; };
   if (h.mode === 'time') return l && l.done && l.at ? split(fmtTime(l.at)) : null;
   if (h.mode === 'value') { if (!l || l.value == null) return null; const f = h.value.format; if (f === 'time') return split(fmtMinutes(l.value)); const s = f === 'duration' ? fmtDuration(l.value).replace(' ', '') : fmtNum(l.value); return { txt: s, small: s.length > 4 }; }
@@ -1178,7 +1176,7 @@ function monthBlock(h, ym) {
   let cells = '';
   for (let i = 0; i < first; i++) cells += '<span class="blank"></span>';
   days.forEach(d => {
-    const s = habitDayStatus(h, d); const c = cellText(h, d); const n = Number(d.slice(8));
+    const s = habitDayStatus(h, d); const c = cellText(h, d, true); const n = Number(d.slice(8));
     const klass = s === 'ok' ? 'ok' : s === 'na' ? 'na' : s === 'future' ? 'fut' : '';
     const inner = (s === 'na' ? '' : `<i>${n}</i>`) + (c ? `<b class="${c.small ? 'sm' : ''}${c.sub ? ' two' : ''}">${esc(c.txt)}${c.sub ? `<u>${esc(c.sub)}</u>` : ''}</b>` : (s === 'na' ? '–' : s === 'ok' ? '<b>✓</b>' : ''));
     cells += `<span class="${klass} num" title="${d}${c ? ' · ' + esc(c.txt) : ''}">${inner}</span>`;
@@ -1205,11 +1203,12 @@ function renderStats() {
     const hs = statHabits().filter(h => days.some(d => existsOn(h, d)));
     if (!hs.length) { b.append(el('<div class="empty"><strong>No habits in this week</strong><span>Logs will appear here once you start.</span></div>')); return; }
     const tbl = el('<div class="wtable"></div>');
-    tbl.append(el(`<div class="wrow head"><span>Habit</span>${days.map(d => `<span class="${d === t ? 'td' : ''}">${DAYS[dow(d)]}<br>${Number(d.slice(8))}</span>`).join('')}</div>`));
+    tbl.append(el(`<div class="wrow head"><span></span>${days.map(d => `<span class="${d === t ? 'td' : ''}">${DAYS[dow(d)][0]}</span>`).join('')}</div>`));
     hs.forEach(h => {
       let goal = '';
       if (h.schedule.type === 'weekly') { const p = periodProgress(h, S.ui.statWeek); goal = `<span class="badge goal ${p.n >= p.target ? 'met' : ''}" style="height:18px;font-size:10px;padding:0 5px">${p.n}/${p.target}</span>`; }
-      tbl.append(el(`<div class="wrow"><div class="nm"><span class="em">${esc(h.emoji)}</span><span class="tx">${esc(h.name)}</span>${goal}</div>${days.map(d => dayCell(h, d, 't8').replace('<span class="', '<span class="c ')).join('')}</div>`));
+      const cells = days.map(d => { const st = habitDayStatus(h, d); if (st === 'na' || st === 'future') return '<span class="c na">–</span>'; return `<span class="c ${st === 'ok' ? 'ok' : ''}" title="${d}"></span>`; }).join('');
+      tbl.append(el(`<div class="wrow"><div class="nm"><span class="em">${esc(h.emoji)}</span><span class="tx">${esc(h.name)}</span>${goal}</div>${cells}</div>`));
     });
     b.append(tbl);
     let green = 0, elig = 0; days.forEach(d => { if (d > t) return; const s = dayScore(d); if (s.pct != null) { elig++; if (s.pct >= S.settings.threshold) green++; } });

@@ -1,0 +1,1256 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>My Routines</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1">
+<meta name="claude:viewport-fit-sides" content="cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Routines">
+<meta name="theme-color" content="#0F1113">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icon-180.png">
+<style>
+/* Layout: one-screen app; header + week strip fixed at top, habit table scrolls, nav fixed at bottom. */
+:root{
+  --bg:#0F1113; --panel:#171A1E; --card:#1C2024; --card-2:#23282D; --line:#2B3137; --line-2:#363D44;
+  --fg:#E9ECEF; --muted:#8E969E; --dim:#5F676F;
+  --sage:#8FB8A0; --accent:#6FBF8E; --accent-ink:#0C2416; --accent-dim:rgba(111,191,142,.18);
+  --red:#E0655A; --yellow:#E3B23C; --green:#5DBE7F; --neutral:#2E343A;
+  --streak:#F0A04B; --streak-bg:#2A2016;
+  --font:-apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",Roboto,"Helvetica Neue",Arial,"Noto Sans KR",sans-serif;
+  --radius:14px; --nav-h:58px;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{margin:0;background:var(--bg);color:var(--fg);font-family:var(--font);font-size:15px;line-height:1.35;-webkit-font-smoothing:antialiased;-webkit-text-size-adjust:100%;overscroll-behavior:none}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);background:var(--bg);z-index:30}
+button,input,select,textarea{font:inherit;color:inherit}
+button{cursor:pointer;border:0;background:none;padding:0;-webkit-tap-highlight-color:transparent;touch-action:manipulation}
+button:focus-visible,input:focus-visible,select:focus-visible,[tabindex]:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+input,select,textarea{background:var(--card-2);border:1px solid var(--line-2);border-radius:10px;padding:10px 12px;width:100%;min-height:44px}
+input::placeholder,textarea::placeholder{color:var(--dim)}
+input[type=number]{font-variant-numeric:tabular-nums}
+h1,h2,h3{margin:0;text-wrap:balance}
+.hidden{display:none!important}
+.muted{color:var(--muted)}
+.dim{color:var(--dim)}
+.small{font-size:12px}
+.tnum{font-variant-numeric:tabular-nums}
+.row{display:flex;align-items:center;gap:8px}
+.grow{flex:1;min-width:0}
+.ellip{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+
+/* App frame */
+#app{height:100%;display:flex;flex-direction:column;padding-left:max(0px,env(safe-area-inset-left,0px));padding-right:max(0px,env(safe-area-inset-right,0px))}
+.screen{flex:1;min-height:0;display:none;flex-direction:column}
+.screen.active{display:flex}
+.scroll{flex:1;min-height:0;overflow-y:auto;-webkit-overflow-scrolling:touch;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:0 calc(var(--nav-h) + 90px + env(safe-area-inset-bottom,0px))}
+.top{padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:10px 0}
+nav.tabbar{position:fixed;left:0;right:0;bottom:0;z-index:20;background:rgba(15,17,19,.92);backdrop-filter:saturate(1.4) blur(14px);-webkit-backdrop-filter:saturate(1.4) blur(14px);border-top:1px solid var(--line);display:flex;justify-content:space-around;padding:6px max(24px,env(safe-area-inset-left,0px)) calc(6px + env(safe-area-inset-bottom,0px)) max(24px,env(safe-area-inset-right,0px));height:calc(var(--nav-h) + env(safe-area-inset-bottom,0px))}
+nav.tabbar button{display:flex;flex-direction:column;align-items:center;gap:3px;min-width:84px;padding:4px 0;color:var(--muted);font-size:11px;font-weight:500;border-radius:10px}
+nav.tabbar button.active{color:var(--accent);font-weight:600}
+nav.tabbar svg{width:24px;height:24px}
+
+/* Header */
+.hdr{display:flex;align-items:center;justify-content:space-between;gap:8px;min-height:44px}
+.month-btn{display:flex;align-items:center;gap:6px;font-size:22px;font-weight:700;letter-spacing:-.2px;min-height:44px;padding:0 4px;border-radius:10px}
+.month-btn svg{width:18px;height:18px;color:var(--muted)}
+.icon-btn{width:40px;height:40px;border-radius:12px;display:inline-flex;align-items:center;justify-content:center;color:var(--fg);background:var(--card)}
+.icon-btn svg{width:20px;height:20px}
+.icon-btn.ghost{background:none;color:var(--muted)}
+.chip{display:inline-flex;align-items:center;gap:5px;height:30px;padding:0 10px;border-radius:15px;background:var(--card);color:var(--muted);font-size:13px;font-weight:500;white-space:nowrap}
+.chip.streak{background:var(--streak-bg);color:var(--streak);font-weight:700}
+.chip.on{background:var(--fg);color:var(--bg)}
+.chip.tag.on{background:var(--accent-dim);color:var(--accent)}
+
+/* Week strip */
+.week{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:2px;padding:6px 0 2px}
+.day{display:flex;flex-direction:column;align-items:center;gap:6px;padding:8px 0 6px;border-radius:16px;min-height:44px}
+.day .dn{font-size:12px;color:var(--muted);font-weight:500}
+.day.sel{background:var(--card-2)}
+.day.sel .dn{color:var(--fg);font-weight:700}
+.day .ring{position:relative;width:40px;height:40px}
+.day .ring svg{position:absolute;inset:0;width:40px;height:40px;transform:rotate(-90deg)}
+.day .ring .num{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:600;color:var(--muted);font-variant-numeric:tabular-nums}
+.day.today .ring .num{color:var(--fg)}
+.day .ring.full .num{color:var(--accent-ink);font-weight:700}
+.day.future .ring .num{color:var(--dim)}
+
+/* Filters */
+.filters{display:flex;gap:6px;overflow-x:auto;padding:8px 0 10px;scrollbar-width:none;-ms-overflow-style:none}
+.filters::-webkit-scrollbar{display:none}
+.filters .chip{flex:0 0 auto;min-height:32px}
+.select-wrap{position:relative;flex:0 0 auto}
+.select-wrap select{appearance:none;-webkit-appearance:none;height:32px;min-height:32px;padding:0 26px 0 12px;border-radius:16px;background:var(--fg);color:var(--bg);border:0;font-size:13px;font-weight:600;width:auto}
+.select-wrap svg{position:absolute;right:9px;top:9px;width:14px;height:14px;color:var(--bg);pointer-events:none}
+
+/* Habit table */
+.table{border:1px solid var(--line);border-radius:12px;overflow:hidden;background:var(--panel)}
+.hrow{display:grid;grid-template-columns:30px 84px minmax(0,1fr) 62px;align-items:stretch;border-top:1px solid var(--line);min-height:58px;position:relative;background:var(--panel);transition:background .15s}
+.hrow:first-child{border-top:0}
+.hrow.dragging{opacity:.35}
+.hrow.drop-before{box-shadow:inset 0 2px 0 var(--accent)}
+.hrow.drop-after{box-shadow:inset 0 -2px 0 var(--accent)}
+.hrow.done{background:var(--panel)}
+.hrow.done .nm{color:var(--muted)}
+.hrow.flex-skip .nm{color:var(--fg)}
+.c-num{display:flex;align-items:center;justify-content:center;color:var(--dim);font-size:13px;font-variant-numeric:tabular-nums;border-right:1px solid var(--line);touch-action:none;user-select:none;-webkit-user-select:none;cursor:grab}
+.c-note{display:flex;align-items:center;padding:8px 8px;font-size:13px;color:var(--muted);border-right:1px solid var(--line);line-height:1.25;overflow-wrap:anywhere}
+.c-name{display:flex;align-items:center;gap:8px;padding:8px 8px 8px 10px;min-width:0;text-align:left;border-right:1px solid var(--line)}
+.c-name .em{font-size:19px;line-height:1;flex:0 0 auto}
+.c-name .nm{flex:1;min-width:0;font-size:15px;font-weight:500;overflow-wrap:anywhere}
+.c-name .sub{display:block;font-size:11px;color:var(--dim);margin-top:2px}
+.badge{display:inline-flex;align-items:center;gap:3px;height:22px;padding:0 7px;border-radius:11px;font-size:12px;font-weight:700;flex:0 0 auto;font-variant-numeric:tabular-nums}
+.badge.streak{background:var(--streak-bg);color:var(--streak)}
+.badge.goal{background:var(--card-2);color:var(--muted);font-weight:600}
+.badge.goal.met{background:var(--accent-dim);color:var(--accent)}
+.c-log{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;padding:6px 4px;min-height:58px;position:relative}
+.c-log .em{font-size:22px;line-height:1;transition:transform .25s cubic-bezier(.34,1.56,.64,1)}
+.c-log .em.pop{animation:pop .45s cubic-bezier(.34,1.56,.64,1)}
+@keyframes pop{0%{transform:scale(.3);opacity:0}60%{transform:scale(1.25);opacity:1}100%{transform:scale(1)}}
+.c-log .val{font-size:11px;color:var(--muted);font-variant-numeric:tabular-nums;line-height:1.1;text-align:center}
+.c-log .val.met{color:var(--accent);font-weight:700}
+.c-log .circle{width:30px;height:30px;border-radius:15px;border:2px solid var(--line-2)}
+.c-log .circle.part{border-color:var(--yellow)}
+.c-log:disabled{opacity:.4;cursor:default}
+.c-log .cnt-ring{position:absolute;inset:6px 10px;border-radius:12px;pointer-events:none}
+.empty{padding:36px 20px;text-align:center;color:var(--muted);border:1px dashed var(--line-2);border-radius:12px;display:flex;flex-direction:column;gap:8px;align-items:center}
+.empty strong{color:var(--fg)}
+.progress-line{display:flex;align-items:center;justify-content:space-between;padding:4px 2px 8px;font-size:13px;color:var(--muted)}
+.progress-line b{color:var(--fg);font-weight:600}
+.bar{height:5px;border-radius:3px;background:var(--neutral);overflow:hidden;margin-bottom:10px}
+.bar i{display:block;height:100%;border-radius:3px;background:var(--green);transition:width .3s}
+
+/* FAB */
+.fab{position:fixed;right:max(18px,env(safe-area-inset-right,0px));bottom:calc(var(--nav-h) + 16px + env(safe-area-inset-bottom,0px));width:58px;height:58px;border-radius:29px;background:var(--accent);color:var(--accent-ink);display:flex;align-items:center;justify-content:center;box-shadow:0 8px 20px rgba(0,0,0,.4);z-index:15}
+.fab svg{width:28px;height:28px}
+.fab:active{transform:scale(.94)}
+
+/* Sheets */
+.backdrop{position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:40;opacity:0;transition:opacity .2s;pointer-events:none}
+.backdrop.show{opacity:1;pointer-events:auto}
+.sheet{position:fixed;left:0;right:0;bottom:0;z-index:41;background:var(--panel);border-radius:18px 18px 0 0;max-height:92%;display:flex;flex-direction:column;transform:translateY(100%);transition:transform .25s cubic-bezier(.2,.8,.2,1);padding-bottom:env(safe-area-inset-bottom,0px)}
+.sheet.show{transform:translateY(0)}
+.sheet-h{display:flex;align-items:center;justify-content:space-between;padding:12px max(16px,env(safe-area-inset-right,0px)) 8px max(16px,env(safe-area-inset-left,0px));border-bottom:1px solid var(--line)}
+.sheet-h h2{font-size:17px;font-weight:700}
+.sheet-h .tb{min-height:40px;padding:0 8px;font-size:16px;color:var(--muted);border-radius:8px}
+.sheet-h .tb.primary{color:var(--accent);font-weight:700}
+.sheet-b{overflow-y:auto;padding:14px max(16px,env(safe-area-inset-right,0px)) 20px max(16px,env(safe-area-inset-left,0px));display:flex;flex-direction:column;gap:16px}
+.field{display:flex;flex-direction:column;gap:6px}
+.field label,.field .lbl{font-size:12px;font-weight:600;color:var(--muted);letter-spacing:.2px;text-transform:uppercase}
+.field .help{font-size:12px;color:var(--dim)}
+.seg{display:flex;background:var(--card);border-radius:10px;padding:3px;gap:2px}
+.seg button{flex:1;min-height:36px;border-radius:8px;font-size:13px;font-weight:500;color:var(--muted);padding:0 6px}
+.seg button.on{background:var(--card-2);color:var(--fg);font-weight:600}
+.seg.wrap{flex-wrap:wrap}
+.seg.wrap button{flex:1 1 30%}
+.days7{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:5px}
+.days7 button{height:40px;border-radius:10px;background:var(--card);color:var(--muted);font-size:14px;font-weight:500}
+.days7 button.on{background:var(--accent);color:var(--accent-ink);font-weight:700}
+.pills{display:flex;flex-wrap:wrap;gap:6px}
+.pills .chip{min-height:34px}
+.chip.add{border:1px dashed var(--line-2);background:none}
+.emoji-big{width:84px;height:84px;border-radius:24px;background:var(--card);font-size:44px;display:flex;align-items:center;justify-content:center;align-self:center;position:relative}
+.emoji-big input{position:absolute;inset:0;opacity:0;font-size:40px;text-align:center;background:none;border:0}
+.emoji-grid{display:grid;grid-template-columns:repeat(8,minmax(0,1fr));gap:6px}
+.emoji-grid button{height:40px;border-radius:10px;background:var(--card);font-size:22px}
+.emoji-grid button.on{background:var(--accent-dim);box-shadow:inset 0 0 0 2px var(--accent)}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.toggle{display:flex;align-items:center;justify-content:space-between;gap:12px;min-height:44px}
+.switch{width:50px;height:30px;border-radius:15px;background:var(--line-2);position:relative;flex:0 0 auto;transition:background .2s}
+.switch::after{content:"";position:absolute;top:3px;left:3px;width:24px;height:24px;border-radius:12px;background:#fff;transition:left .2s}
+.switch.on{background:var(--accent)}
+.switch.on::after{left:23px}
+.btn{min-height:46px;border-radius:12px;padding:0 16px;font-weight:600;background:var(--card-2);color:var(--fg);display:inline-flex;align-items:center;justify-content:center;gap:8px}
+.btn.primary{background:var(--accent);color:var(--accent-ink)}
+.btn.danger{background:rgba(224,101,90,.15);color:var(--red)}
+.btn.block{width:100%}
+.btn:disabled{opacity:.45;cursor:default}
+.menu{display:flex;flex-direction:column;gap:6px}
+.menu button{min-height:50px;border-radius:12px;background:var(--card);display:flex;align-items:center;gap:12px;padding:0 14px;font-size:16px;text-align:left}
+.menu button svg{width:20px;height:20px;color:var(--muted);flex:0 0 auto}
+.menu button.danger{color:var(--red)}
+.menu button.danger svg{color:var(--red)}
+.numpad{display:flex;flex-direction:column;gap:10px}
+.numpad .big{font-size:28px;font-weight:700;text-align:center;min-height:56px;font-variant-numeric:tabular-nums}
+.stepper{display:flex;align-items:center;justify-content:center;gap:16px}
+.stepper button{width:56px;height:56px;border-radius:28px;background:var(--card-2);font-size:28px;font-weight:500}
+.stepper .total{font-size:34px;font-weight:700;min-width:120px;text-align:center;font-variant-numeric:tabular-nums}
+
+/* Calendar (month) */
+.cal{display:flex;flex-direction:column;gap:8px}
+.cal-h{display:flex;align-items:center;justify-content:space-between}
+.cal-h .ttl{font-size:17px;font-weight:700}
+.cal-dow{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));font-size:11px;color:var(--muted);text-align:center;font-weight:600}
+.cal-grid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:4px}
+.cal-grid button{height:44px;border-radius:12px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;font-size:14px;font-variant-numeric:tabular-nums;color:var(--fg);position:relative}
+.cal-grid button.other{color:var(--dim)}
+.cal-grid button.today{box-shadow:inset 0 0 0 1.5px var(--accent)}
+.cal-grid button.sel{background:var(--accent);color:var(--accent-ink);font-weight:700}
+.cal-grid button .dot{width:5px;height:5px;border-radius:3px;background:var(--neutral)}
+.cal-grid button .dot.r{background:var(--red)}.cal-grid button .dot.y{background:var(--yellow)}.cal-grid button .dot.g{background:var(--green)}
+.cal-grid button.sel .dot{background:var(--accent-ink)}
+.cal-grid button.future{color:var(--dim)}
+
+/* Toast */
+.toast{position:fixed;left:50%;bottom:calc(var(--nav-h) + 20px + env(safe-area-inset-bottom,0px));transform:translate(-50%,20px);background:#2A3036;color:var(--fg);border-radius:14px;padding:10px 10px 10px 14px;display:flex;align-items:center;gap:12px;box-shadow:0 10px 30px rgba(0,0,0,.5);z-index:50;opacity:0;transition:all .2s;pointer-events:none;max-width:calc(100% - 32px);font-size:14px}
+.toast.show{opacity:1;transform:translate(-50%,0);pointer-events:auto}
+.toast button{color:var(--accent);font-weight:700;min-height:36px;padding:0 10px;border-radius:8px;background:rgba(111,191,142,.12)}
+
+/* Stats */
+.tabs{display:flex;background:var(--card);border-radius:12px;padding:3px;gap:2px;margin:8px 0 4px}
+.tabs button{flex:1;min-height:38px;border-radius:9px;font-size:14px;font-weight:500;color:var(--muted)}
+.tabs button.on{background:var(--card-2);color:var(--fg);font-weight:700}
+.pnav{display:flex;align-items:center;justify-content:space-between;padding:6px 0}
+.pnav .ttl{font-size:17px;font-weight:700}
+.cards2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.scard{background:var(--card);border-radius:14px;padding:12px;display:flex;flex-direction:column;gap:8px;text-align:left;min-width:0}
+.scard .t{display:flex;align-items:center;gap:6px;font-weight:600;font-size:14px;min-width:0}
+.scard .t .nm{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.mini{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:3px}
+.mini span{aspect-ratio:1;border-radius:4px;background:var(--neutral);display:flex;align-items:center;justify-content:center;font-size:10px;max-width:100%}
+.mini span.ok{background:var(--green);color:#0b2416;font-weight:700}
+.mini span.na{background:transparent;box-shadow:inset 0 0 0 1px var(--line)}
+.mini span.blank{background:transparent}
+.scard .meta{display:flex;justify-content:space-between;font-size:12px;color:var(--muted);font-variant-numeric:tabular-nums}
+.scard .meta b{color:var(--fg)}
+.sumline{background:var(--card);border-radius:12px;padding:12px 14px;font-size:14px;display:flex;justify-content:space-between;align-items:center}
+.sumline b{font-size:18px}
+.tiles{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.tile{background:var(--card);border-radius:12px;padding:10px;display:flex;flex-direction:column;gap:2px;min-width:0}
+.tile .k{font-size:11px;color:var(--muted)}
+.tile .v{font-size:22px;font-weight:700;font-variant-numeric:tabular-nums}
+.tile .s{font-size:11px;color:var(--dim)}
+.wk-bars{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:6px;align-items:end;height:120px;background:var(--card);border-radius:12px;padding:12px 12px 6px}
+.wk-bars .col{display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%;gap:4px;min-width:0}
+.wk-bars .col .b{width:100%;border-radius:5px 5px 2px 2px;background:var(--neutral);min-height:3px}
+.wk-bars .col .p{font-size:10px;color:var(--muted);font-variant-numeric:tabular-nums}
+.wk-bars .col .d{font-size:11px;color:var(--muted)}
+.wk-bars .col.today .d{color:var(--fg);font-weight:700}
+.list{display:flex;flex-direction:column;background:var(--card);border-radius:12px;overflow:hidden}
+.list .li{display:flex;align-items:center;gap:10px;padding:10px 14px;border-top:1px solid var(--line);min-height:48px;font-size:14px}
+.list .li:first-child{border-top:0}
+.list .li .nm{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.list .li .v{font-variant-numeric:tabular-nums;color:var(--muted)}
+.list .li.btn-row{cursor:pointer}
+.gl-grid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:5px}
+.gl-grid span{aspect-ratio:1;border-radius:8px;background:var(--neutral);display:flex;align-items:center;justify-content:center;font-size:15px;position:relative}
+.gl-grid span.ok{background:var(--green)}
+.gl-grid span.na{background:transparent;box-shadow:inset 0 0 0 1px var(--line)}
+.gl-grid span.blank{background:transparent}
+.gl-grid span i{position:absolute;top:3px;left:5px;font-size:9px;font-style:normal;color:rgba(255,255,255,.55);font-variant-numeric:tabular-nums}
+.gl-grid span.ok i{color:rgba(0,0,0,.55)}
+.section-t{font-size:13px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.3px;margin-top:6px}
+canvas.chart{width:100%;height:190px;display:block;background:var(--card);border-radius:12px}
+.legend{font-size:12px;color:var(--muted);display:flex;gap:12px;flex-wrap:wrap}
+.detail-h{display:flex;align-items:center;gap:8px;min-height:44px}
+.detail-h h2{font-size:20px;font-weight:700;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.note-box{background:var(--card);border-radius:12px;padding:12px 14px;font-size:13px;color:var(--muted);line-height:1.5}
+.note-box b{color:var(--fg)}
+.file-btn{position:relative;overflow:hidden}
+.file-btn input{position:absolute;inset:0;opacity:0;cursor:pointer}
+.range input[type=range]{padding:0;min-height:30px;accent-color:var(--accent)}
+.tagrow{display:flex;align-items:center;gap:8px}
+.tagrow input{flex:1}
+.tagrow .emo{width:54px;text-align:center;flex:0 0 auto}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<div id="app">
+
+  <!-- HOME -->
+  <section class="screen active" id="scr-home">
+    <div class="top">
+      <div class="hdr">
+        <button class="month-btn" id="monthBtn" aria-label="Open calendar"><span id="monthLbl">October 2026</span>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button>
+        <div class="row">
+          <span class="chip streak" id="todayStreakChip" title="Green-light day streak">🔥 <span id="glStreak">0</span></span>
+          <button class="icon-btn ghost" id="todayBtn" aria-label="Go to today"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></button>
+          <button class="icon-btn ghost" id="settingsBtn" aria-label="Settings"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="5" cy="12" r="1.6"/><circle cx="12" cy="12" r="1.6"/><circle cx="19" cy="12" r="1.6"/></svg></button>
+        </div>
+      </div>
+      <div class="week" id="week"></div>
+      <div class="filters" id="filters"></div>
+    </div>
+    <div class="scroll" id="homeScroll">
+      <div class="progress-line"><span id="dayLbl">Monday, Oct 19</span><span><b id="dayDone">0</b> / <span id="dayDue">0</span> · <b id="dayPct">—</b></span></div>
+      <div class="bar"><i id="dayBar" style="width:0%"></i></div>
+      <div class="table" id="table"></div>
+      <div id="homeFoot" class="small dim" style="padding:10px 4px;text-align:center"></div>
+    </div>
+    <button class="fab" id="fab" aria-label="Add habit"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></button>
+  </section>
+
+  <!-- STATS -->
+  <section class="screen" id="scr-stats">
+    <div class="top">
+      <div class="hdr"><h1 style="font-size:22px;font-weight:700">Statistics</h1></div>
+      <div class="tabs" id="statTabs"><button data-t="monthly" class="on">Monthly</button><button data-t="weekly">Weekly</button><button data-t="green">Green Light</button></div>
+    </div>
+    <div class="scroll" id="statsScroll"><div id="statsBody" style="display:flex;flex-direction:column;gap:12px"></div></div>
+  </section>
+
+  <!-- HABIT DETAIL (read-only) -->
+  <section class="screen" id="scr-detail">
+    <div class="top"><div class="detail-h"><button class="icon-btn ghost" id="detailBack" aria-label="Back"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 6l-6 6 6 6"/></svg></button><h2 id="detailTitle">Habit</h2></div></div>
+    <div class="scroll"><div id="detailBody" style="display:flex;flex-direction:column;gap:12px"></div></div>
+  </section>
+
+  <nav class="tabbar">
+    <button data-s="home" class="active"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M3 11l9-8 9 8v9a1 1 0 0 1-1 1h-5v-6h-6v6H4a1 1 0 0 1-1-1z"/></svg><span>Home</span></button>
+    <button data-s="stats"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="3"/><path d="M8 16v-5M12 16V8M16 16v-3"/></svg><span>Statistics</span></button>
+  </nav>
+</div>
+
+<div class="backdrop" id="backdrop"></div>
+<div class="sheet" id="sheet" role="dialog" aria-modal="true"><div class="sheet-h" id="sheetH"></div><div class="sheet-b" id="sheetB"></div></div>
+<div class="toast" id="toast" role="status"><span id="toastMsg"></span><button id="toastUndo" class="hidden">Undo</button></div>
+
+<script>
+'use strict';
+/* ========== Utilities ========== */
+const $ = (s, el = document) => el.querySelector(s);
+const $$ = (s, el = document) => Array.from(el.querySelectorAll(s));
+const DAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+const DAYS_FULL = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+const MONTHS = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+const MONTHS_S = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+
+function pad(n) { return (n < 10 ? '0' : '') + n; }
+function fmtDate(d) { return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate()); }
+function parseDate(s) { const [y, m, d] = s.split('-').map(Number); return new Date(y, m - 1, d); }
+function todayStr() { return fmtDate(new Date()); }
+function addDays(s, n) { const d = parseDate(s); d.setDate(d.getDate() + n); return fmtDate(d); }
+function dow(s) { return parseDate(s).getDay(); }
+function weekStart(s) { return addDays(s, -dow(s)); }
+function monthStart(s) { return s.slice(0, 7) + '-01'; }
+function monthKey(s) { return s.slice(0, 7); }
+function daysInMonth(y, m) { return new Date(y, m + 1, 0).getDate(); }
+function addMonths(ym, n) { const [y, m] = ym.split('-').map(Number); const d = new Date(y, m - 1 + n, 1); return d.getFullYear() + '-' + pad(d.getMonth() + 1); }
+function monthDays(ym) { const [y, m] = ym.split('-').map(Number); const n = daysInMonth(y, m - 1); const out = []; for (let i = 1; i <= n; i++) out.push(ym + '-' + pad(i)); return out; }
+function weekDays(start) { const out = []; for (let i = 0; i < 7; i++) out.push(addDays(start, i)); return out; }
+function cmpDate(a, b) { return a < b ? -1 : a > b ? 1 : 0; }
+function fmtTime(iso) { const d = new Date(iso); let h = d.getHours(); const m = d.getMinutes(); const ap = h >= 12 ? 'PM' : 'AM'; h = h % 12; if (h === 0) h = 12; return h + ':' + pad(m) + ' ' + ap; }
+function fmtMinutes(min) { min = Math.round(min); let h = Math.floor(min / 60) % 24; const m = min % 60; const ap = h >= 12 ? 'PM' : 'AM'; h = h % 12; if (h === 0) h = 12; return h + ':' + pad(m) + ' ' + ap; }
+function fmtDuration(min) { min = Math.round(min); const h = Math.floor(min / 60), m = min % 60; return h + 'h ' + (m ? pad(m) + 'm' : '').trim(); }
+function fmtNum(n, dec) { if (n == null || isNaN(n)) return '—'; const s = dec == null ? (Math.round(n * 100) / 100).toString() : n.toFixed(dec); return s.replace(/\B(?=(\d{3})+(?!\d))/g, ','); }
+function uid() { return Date.now().toString(36) + Math.random().toString(36).slice(2, 8); }
+function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c])); }
+function clone(o) { return JSON.parse(JSON.stringify(o)); }
+function haptic(ms) { try { if (navigator.vibrate) navigator.vibrate(ms || 10); } catch (e) {} }
+function el(html) { const t = document.createElement('template'); t.innerHTML = html.trim(); return t.content.firstElementChild; }
+
+/* ========== Persistence (IndexedDB, localStorage fallback) ========== */
+const DB_NAME = 'routines-db', STORE = 'kv';
+const Store = {
+  db: null, memo: {},
+  open() {
+    return new Promise(res => {
+      if (!window.indexedDB) return res(null);
+      let req;
+      try { req = indexedDB.open(DB_NAME, 1); } catch (e) { return res(null); }
+      req.onupgradeneeded = () => { req.result.createObjectStore(STORE); };
+      req.onsuccess = () => { this.db = req.result; res(this.db); };
+      req.onerror = () => res(null);
+      req.onblocked = () => res(null);
+    });
+  },
+  async get(key) {
+    if (this.db) {
+      try {
+        return await new Promise((res, rej) => { const tx = this.db.transaction(STORE, 'readonly'); const r = tx.objectStore(STORE).get(key); r.onsuccess = () => res(r.result); r.onerror = () => rej(r.error); });
+      } catch (e) {}
+    }
+    try { const v = localStorage.getItem('routines:' + key); return v ? JSON.parse(v) : undefined; } catch (e) { return undefined; }
+  },
+  async set(key, val) {
+    let ok = false;
+    if (this.db) {
+      try {
+        await new Promise((res, rej) => { const tx = this.db.transaction(STORE, 'readwrite'); tx.objectStore(STORE).put(val, key); tx.oncomplete = () => res(); tx.onerror = () => rej(tx.error); });
+        ok = true;
+      } catch (e) {}
+    }
+    try { localStorage.setItem('routines:' + key, JSON.stringify(val)); ok = true; } catch (e) {}
+    return ok;
+  }
+};
+
+/* ========== State ========== */
+const S = {
+  habits: [], tags: [], logs: {}, // logs[habitId][date] = entry
+  settings: { threshold: 80, completedBehavior: 'bottom', lastBackup: null },
+  ui: { screen: 'home', date: todayStr(), weekStart: weekStart(todayStr()), timeFilter: 'all', tagFilter: null, statTab: 'monthly', statMonth: monthKey(todayStr()), statWeek: weekStart(todayStr()), statTag: null, detailHabit: null, detailRange: 'month' }
+};
+const saveTimers = {};
+function persist(key) {
+  clearTimeout(saveTimers[key]);
+  saveTimers[key] = setTimeout(() => { Store.set(key, S[key]).then(ok => { if (!ok) toast('Could not save. Storage may be full or blocked.'); }); }, 120);
+}
+function persistAll() { ['habits', 'tags', 'logs', 'settings'].forEach(persist); }
+
+const DEFAULT_HABIT = () => ({
+  id: uid(), name: '', emoji: '✅', note: '', timeOfDay: 'any', tags: [], mode: 'check',
+  schedule: { type: 'daily', days: [1, 2, 3, 4, 5], target: 3 },
+  value: { unit: '', format: 'number', target: null, cmp: '<=', success: 'record' },
+  count: { target: 8, unit: 'glasses', step: 1, allowOver: true, completeOn: 'target' },
+  streak: true, order: 0, createdAt: todayStr(), deletedAt: null
+});
+
+/* ========== Log helpers ========== */
+function getLog(hid, date) { return (S.logs[hid] || {})[date] || null; }
+function setLog(hid, date, entry) {
+  if (!S.logs[hid]) S.logs[hid] = {};
+  if (entry == null || (entry.done === false && entry.value == null && !(entry.total > 0) && !(entry.events && entry.events.length))) delete S.logs[hid][date];
+  else S.logs[hid][date] = entry;
+  if (S.logs[hid] && !Object.keys(S.logs[hid]).length) delete S.logs[hid];
+  persist('logs');
+}
+function habitById(id) { return S.habits.find(h => h.id === id); }
+function activeHabits() { return S.habits.filter(h => !h.deletedAt).sort((a, b) => a.order - b.order); }
+
+/* ========== Scheduling ========== */
+function isFlex(h) { return h.schedule.type === 'weekly' || h.schedule.type === 'monthly'; }
+function existsOn(h, date) { return date >= h.createdAt && (!h.deletedAt || date < h.deletedAt); }
+function isScheduled(h, date) {
+  if (!existsOn(h, date)) return false;
+  const t = h.schedule.type;
+  if (t === 'daily') return true;
+  if (t === 'weekdays') return h.schedule.days.includes(dow(date));
+  return true; // weekly / monthly goals appear every day
+}
+function periodKey(h, date) { return h.schedule.type === 'weekly' ? weekStart(date) : h.schedule.type === 'monthly' ? monthKey(date) : date; }
+function periodDays(h, key) { return h.schedule.type === 'weekly' ? weekDays(key) : h.schedule.type === 'monthly' ? monthDays(key) : [key]; }
+
+/* ========== Completion ========== */
+function isDone(h, date) {
+  const l = getLog(h.id, date); if (!l) return false;
+  if (h.mode === 'check' || h.mode === 'time') return !!l.done;
+  if (h.mode === 'value') { if (l.value == null) return false; if (h.value.success === 'target' && h.value.target != null) return meetsTarget(h, l.value); return true; }
+  if (h.mode === 'count') { const t = l.total || 0; return h.count.completeOn === 'any' ? t > 0 : t >= h.count.target; }
+  return false;
+}
+function meetsTarget(h, v) { const t = h.value.target; if (t == null || v == null) return false; return h.value.cmp === '>=' ? v >= t : v <= t; }
+function periodProgress(h, date) {
+  const key = periodKey(h, date); const days = periodDays(h, key);
+  let n = 0; days.forEach(d => { if (existsOn(h, d) && isDone(h, d)) n++; });
+  return { n, target: h.schedule.target, key, days };
+}
+/* Day score: fixed-schedule habits always count; weekly/monthly goals count only when completed that day. */
+function dayScore(date, habits) {
+  habits = habits || activeHabitsOn(date);
+  let due = 0, done = 0, fixed = 0;
+  habits.forEach(h => {
+    if (!isScheduled(h, date)) return;
+    const d = isDone(h, date);
+    if (isFlex(h)) { if (d) { due++; done++; } } else { fixed++; due++; if (d) done++; }
+  });
+  const pct = due ? Math.round(done / due * 100) : null;
+  return { due, done, pct, fixed };
+}
+function activeHabitsOn(date) { return S.habits.filter(h => existsOn(h, date)).sort((a, b) => a.order - b.order); }
+function scoreColor(pct) { if (pct == null) return null; if (pct >= S.settings.threshold) return 'g'; if (pct >= 50) return 'y'; return 'r'; }
+function colorVar(c) { return c === 'g' ? 'var(--green)' : c === 'y' ? 'var(--yellow)' : c === 'r' ? 'var(--red)' : 'var(--neutral)'; }
+function isGreenDay(date) { const s = dayScore(date); return s.pct != null && s.pct >= S.settings.threshold; }
+
+/* ========== Streaks ========== */
+function periodMet(h, key) {
+  if (isFlex(h)) { const days = periodDays(h, key); let n = 0; days.forEach(d => { if (existsOn(h, d) && isDone(h, d)) n++; }); return n >= h.schedule.target; }
+  return isDone(h, key);
+}
+function prevPeriod(h, key) { if (h.schedule.type === 'weekly') return addDays(key, -7); if (h.schedule.type === 'monthly') return addMonths(key, -1); let d = addDays(key, -1); if (h.schedule.type === 'weekdays') { let guard = 0; while (!h.schedule.days.includes(dow(d)) && guard++ < 8) d = addDays(d, -1); } return d; }
+function nextPeriod(h, key) { if (h.schedule.type === 'weekly') return addDays(key, 7); if (h.schedule.type === 'monthly') return addMonths(key, 1); let d = addDays(key, 1); if (h.schedule.type === 'weekdays') { let guard = 0; while (!h.schedule.days.includes(dow(d)) && guard++ < 8) d = addDays(d, 1); } return d; }
+function periodStartDate(h, key) { return h.schedule.type === 'monthly' ? key + '-01' : key; }
+function currentStreak(h, asOf) {
+  asOf = asOf || todayStr();
+  if (h.schedule.type === 'weekdays' && !h.schedule.days.length) return 0;
+  let key = periodKey(h, asOf);
+  let n = 0;
+  // current period: counts if met, otherwise skipped (not broken)
+  if (periodMet(h, key)) n++;
+  key = prevPeriod(h, key);
+  let guard = 0;
+  while (guard++ < 2000) {
+    const start = periodStartDate(h, key);
+    if (start < h.createdAt) { // period before creation: stop
+      if (h.schedule.type === 'monthly' && monthKey(h.createdAt) === key) { if (periodMet(h, key)) { n++; } }
+      else if (h.schedule.type === 'weekly' && weekStart(h.createdAt) === key) { if (periodMet(h, key)) n++; }
+      break;
+    }
+    if (periodMet(h, key)) n++; else break;
+    key = prevPeriod(h, key);
+  }
+  return n;
+}
+function longestStreak(h) {
+  let key = periodKey(h, h.createdAt); const end = periodKey(h, todayStr());
+  let best = 0, cur = 0, guard = 0;
+  while (guard++ < 4000) {
+    if (periodMet(h, key)) { cur++; if (cur > best) best = cur; }
+    else if (!(key === end)) cur = 0;
+    if (key === end) break;
+    key = nextPeriod(h, key);
+    if (periodStartDate(h, key) > todayStr()) break;
+  }
+  return Math.max(best, cur);
+}
+function greenStreak() {
+  let d = todayStr(); let n = 0;
+  if (isGreenDay(d)) n++;
+  d = addDays(d, -1);
+  let guard = 0;
+  while (guard++ < 2000) { const s = dayScore(d); if (s.pct == null) { if (!S.habits.some(h => existsOn(h, d))) break; d = addDays(d, -1); continue; } if (s.pct >= S.settings.threshold) n++; else break; d = addDays(d, -1); }
+  return n;
+}
+/* ========== Sheet & toast ========== */
+const Sheet = {
+  open(title, bodyEl, opts = {}) {
+    const h = $('#sheetH'), b = $('#sheetB');
+    h.innerHTML = '';
+    const left = el(`<button class="tb" id="sheetCancel">${esc(opts.cancelLabel || 'Close')}</button>`);
+    const ttl = el(`<h2>${esc(title)}</h2>`);
+    h.append(left, ttl);
+    if (opts.primary) { const p = el(`<button class="tb primary">${esc(opts.primary)}</button>`); p.addEventListener('click', opts.onPrimary); h.append(p); } else h.append(el('<span style="width:60px"></span>'));
+    b.innerHTML = ''; b.append(bodyEl);
+    left.addEventListener('click', () => { if (opts.onCancel) opts.onCancel(); Sheet.close(); });
+    $('#backdrop').classList.add('show'); $('#sheet').classList.add('show');
+    this.onClose = opts.onClose || null;
+  },
+  close() { $('#backdrop').classList.remove('show'); $('#sheet').classList.remove('show'); if (this.onClose) { const f = this.onClose; this.onClose = null; f(); } }
+};
+$('#backdrop').addEventListener('click', () => Sheet.close());
+
+let toastTimer = null, undoAction = null;
+function toast(msg, undo) {
+  const t = $('#toast'); $('#toastMsg').textContent = msg;
+  const u = $('#toastUndo'); undoAction = undo || null; u.classList.toggle('hidden', !undo);
+  t.classList.add('show'); clearTimeout(toastTimer); toastTimer = setTimeout(() => t.classList.remove('show'), undo ? 4500 : 2200);
+}
+$('#toastUndo').addEventListener('click', () => { if (undoAction) { undoAction(); undoAction = null; } $('#toast').classList.remove('show'); });
+
+/* ========== Navigation ========== */
+function showScreen(name) {
+  S.ui.screen = name;
+  $$('.screen').forEach(s => s.classList.toggle('active', s.id === 'scr-' + name));
+  $$('nav.tabbar button').forEach(b => b.classList.toggle('active', b.dataset.s === (name === 'detail' ? 'stats' : name)));
+  $('#fab').classList.toggle('hidden', name !== 'home');
+  if (name === 'home') renderHome(); if (name === 'stats') renderStats(); if (name === 'detail') renderDetail();
+}
+$$('nav.tabbar button').forEach(b => b.addEventListener('click', () => showScreen(b.dataset.s)));
+
+/* ========== Home ========== */
+function renderHome() { renderHeader(); renderWeek(); renderFilters(); renderTable(); }
+function renderHeader() {
+  const d = parseDate(S.ui.date);
+  $('#monthLbl').textContent = MONTHS[d.getMonth()] + ' ' + d.getFullYear();
+  $('#glStreak').textContent = greenStreak();
+}
+function ringSVG(date, size) {
+  const habits = activeHabitsOn(date).filter(h => isScheduled(h, date));
+  const fixed = habits.filter(h => !isFlex(h));
+  const flexDone = habits.filter(h => isFlex(h) && isDone(h, date));
+  const segs = fixed.map(h => isDone(h, date)).concat(flexDone.map(() => true));
+  const score = dayScore(date, habits);
+  const c = scoreColor(score.pct);
+  const r = 17, cx = 20, cy = 20, circ = 2 * Math.PI * r;
+  let out = `<svg viewBox="0 0 40 40" aria-hidden="true">`;
+  if (!segs.length) { out += `<circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="var(--neutral)" stroke-width="4"/>`; }
+  else {
+    const n = segs.length, gap = n > 1 ? Math.min(3, circ / n * 0.18) : 0, len = circ / n - gap;
+    segs.forEach((on, i) => {
+      out += `<circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="${on ? colorVar(c) : 'var(--neutral)'}" stroke-width="4" stroke-dasharray="${len} ${circ - len}" stroke-dashoffset="${-(i * (len + gap))}" stroke-linecap="${n > 1 ? 'butt' : 'round'}"/>`;
+    });
+  }
+  out += '</svg>';
+  return { svg: out, score, c, full: score.pct != null && score.pct >= 100 && score.due > 0 && c === 'g' };
+}
+function renderWeek() {
+  const w = $('#week'); w.innerHTML = '';
+  const t = todayStr();
+  weekDays(S.ui.weekStart).forEach(date => {
+    const { svg, full, c } = ringSVG(date);
+    const b = el(`<button class="day ${date === S.ui.date ? 'sel' : ''} ${date === t ? 'today' : ''} ${date > t ? 'future' : ''}" aria-label="${DAYS_FULL[dow(date)]} ${date}"><span class="dn">${DAYS[dow(date)]}</span><span class="ring ${full ? 'full' : ''}">${svg}<span class="num">${Number(date.slice(8))}</span></span></button>`);
+    if (full) b.querySelector('.ring').style.background = 'var(--green)';
+    if (full) b.querySelector('.ring').style.borderRadius = '20px';
+    b.addEventListener('click', () => { S.ui.date = date; renderHome(); });
+    w.append(b);
+  });
+}
+let touchX = null;
+$('#week').addEventListener('touchstart', e => { touchX = e.touches[0].clientX; }, { passive: true });
+$('#week').addEventListener('touchend', e => { if (touchX == null) return; const dx = e.changedTouches[0].clientX - touchX; touchX = null; if (Math.abs(dx) > 50) { S.ui.weekStart = addDays(S.ui.weekStart, dx < 0 ? 7 : -7); S.ui.date = S.ui.weekStart === weekStart(todayStr()) ? todayStr() : S.ui.weekStart; renderHome(); } }, { passive: true });
+
+function renderFilters() {
+  const f = $('#filters'); f.innerHTML = '';
+  const sel = el(`<div class="select-wrap"><select id="timeSel" aria-label="Time of day filter"><option value="all">All Times</option><option value="morning">Morning</option><option value="afternoon">Afternoon</option><option value="evening">Evening/Night</option></select><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></div>`);
+  sel.querySelector('select').value = S.ui.timeFilter;
+  sel.querySelector('select').addEventListener('change', e => { S.ui.timeFilter = e.target.value; renderTable(); });
+  f.append(sel);
+  const all = el(`<button class="chip tag ${S.ui.tagFilter == null ? 'on' : ''}">All</button>`);
+  all.addEventListener('click', () => { S.ui.tagFilter = null; renderFilters(); renderTable(); });
+  f.append(all);
+  S.tags.forEach(t => {
+    const b = el(`<button class="chip tag ${S.ui.tagFilter === t.id ? 'on' : ''}">${esc(t.emoji ? t.emoji + ' ' : '')}${esc(t.name)}</button>`);
+    b.addEventListener('click', () => { S.ui.tagFilter = S.ui.tagFilter === t.id ? null : t.id; renderFilters(); renderTable(); });
+    f.append(b);
+  });
+}
+function visibleHabits(date) {
+  return activeHabits().filter(h => existsOn(h, date) && isScheduled(h, date))
+    .filter(h => S.ui.timeFilter === 'all' || h.timeOfDay === S.ui.timeFilter || h.timeOfDay === 'any')
+    .filter(h => S.ui.tagFilter == null || h.tags.includes(S.ui.tagFilter));
+}
+function logCell(h, date) {
+  const l = getLog(h.id, date); const done = isDone(h, date);
+  if (h.mode === 'check') return done ? `<span class="em">${esc(h.emoji)}</span>` : `<span class="circle"></span>`;
+  if (h.mode === 'time') return done ? `<span class="em">${esc(h.emoji)}</span><span class="val">${l && l.at ? fmtTime(l.at) : ''}</span>` : `<span class="circle"></span>`;
+  if (h.mode === 'value') {
+    if (l && l.value != null) { const met = h.value.target != null ? meetsTarget(h, l.value) : null; return `<span class="em">${esc(h.emoji)}</span><span class="val ${met ? 'met' : ''}">${esc(fmtValue(h, l.value))}</span>`; }
+    return `<span class="circle"></span>`;
+  }
+  if (h.mode === 'count') {
+    const t = l ? (l.total || 0) : 0; const met = t >= h.count.target;
+    return `<span class="em" ${t ? '' : 'style="opacity:.45"'}>${esc(h.emoji)}</span><span class="val ${met ? 'met' : ''}">${fmtNum(t)}/${fmtNum(h.count.target)}</span>`;
+  }
+  return '';
+}
+function fmtValue(h, v) {
+  if (h.value.format === 'time') return fmtMinutes(v);
+  if (h.value.format === 'duration') return fmtDuration(v);
+  return fmtNum(v) + (h.value.unit ? ' ' + h.value.unit : '');
+}
+function renderTable() {
+  const date = S.ui.date, t = todayStr();
+  const d = parseDate(date);
+  $('#dayLbl').textContent = DAYS_FULL[d.getDay()] + ', ' + MONTHS_S[d.getMonth()] + ' ' + d.getDate() + (date === t ? ' · Today' : date > t ? ' · Upcoming' : '');
+  const score = dayScore(date);
+  $('#dayDone').textContent = score.done; $('#dayDue').textContent = score.due;
+  $('#dayPct').textContent = score.pct == null ? '—' : score.pct + '%';
+  $('#dayPct').style.color = score.pct == null ? '' : colorVar(scoreColor(score.pct));
+  $('#dayBar').style.width = (score.pct || 0) + '%'; $('#dayBar').style.background = colorVar(scoreColor(score.pct));
+  let list = visibleHabits(date);
+  const behavior = S.settings.completedBehavior;
+  if (behavior === 'hide') list = list.filter(h => !isDone(h, date));
+  else if (behavior === 'bottom') list = list.filter(h => !isDone(h, date)).concat(list.filter(h => isDone(h, date)));
+  const tbl = $('#table'); tbl.innerHTML = '';
+  if (!activeHabits().length) { tbl.replaceWith(el(`<div class="empty" id="table"><strong>No habits yet</strong><span>Tap + to add your first routine.</span></div>`)); $('#homeFoot').textContent = ''; return; }
+  if (!list.length) { tbl.replaceWith(el(`<div class="empty" id="table"><strong>${score.due && behavior === 'hide' ? 'All done for this view' : 'Nothing scheduled here'}</strong><span>${score.due && behavior === 'hide' ? 'Completed habits are hidden (Settings).' : 'Change the filters or add a habit.'}</span></div>`)); $('#homeFoot').textContent = ''; return; }
+  if (!tbl.classList.contains('table')) { const n = el('<div class="table" id="table"></div>'); tbl.replaceWith(n); }
+  const table = $('#table');
+  const future = date > t;
+  list.forEach((h, i) => {
+    const done = isDone(h, date);
+    const streak = h.streak ? currentStreak(h, date <= t ? date : t) : 0;
+    let goal = '';
+    if (isFlex(h)) { const p = periodProgress(h, date); goal = `<span class="badge goal ${p.n >= p.target ? 'met' : ''}" title="Progress toward ${h.schedule.type} target">${p.n}/${p.target} ${h.schedule.type === 'weekly' ? 'wk' : 'mo'}</span>`; }
+    const row = el(`<div class="hrow ${done ? 'done' : ''}" data-id="${h.id}">
+      <div class="c-num" aria-label="Drag to reorder">${i + 1}</div>
+      <div class="c-note">${esc(h.note)}</div>
+      <button class="c-name" aria-label="${esc(h.name)} options"><span class="em">${esc(h.emoji)}</span><span class="nm">${esc(h.name)}</span>${goal}${h.streak && streak > 0 ? `<span class="badge streak">🔥 ${streak}</span>` : ''}</button>
+      <button class="c-log" ${future ? 'disabled' : ''} aria-label="Log ${esc(h.name)}">${logCell(h, date)}</button>
+    </div>`);
+    row.querySelector('.c-name').addEventListener('click', () => habitMenu(h, date));
+    row.querySelector('.c-log').addEventListener('click', () => { if (!future) logAction(h, date, row); });
+    attachDrag(row, h);
+    table.append(row);
+  });
+  $('#homeFoot').textContent = future ? 'Future dates show the schedule but cannot be logged yet.' : (date < t ? 'Editing a past date. Changes only affect this date.' : '');
+}
+
+/* ========== Logging ========== */
+function snapshot(h, date) { const l = getLog(h.id, date); return l ? clone(l) : null; }
+function restore(h, date, snap) { setLog(h.id, date, snap ? clone(snap) : null); renderHome(); }
+function popCell(row) { const em = row && row.querySelector('.c-log .em'); if (em) { em.classList.remove('pop'); void em.offsetWidth; em.classList.add('pop'); } }
+function afterLog(h, date, msg, snap) {
+  haptic(12);
+  renderHeader(); renderWeek(); renderTable();
+  const row = $(`.hrow[data-id="${h.id}"]`); if (row) popCell(row);
+  toast(msg, () => restore(h, date, snap));
+}
+function logAction(h, date, row) {
+  const snap = snapshot(h, date);
+  if (h.mode === 'check') {
+    const l = getLog(h.id, date);
+    if (l && l.done) { setLog(h.id, date, Object.assign({}, l, { done: false, at: null })); afterLog(h, date, `${h.name} undone`, snap); }
+    else { setLog(h.id, date, { done: true, at: new Date().toISOString() }); afterLog(h, date, `${h.emoji} ${h.name} completed`, snap); }
+    return;
+  }
+  if (h.mode === 'time') {
+    const l = getLog(h.id, date);
+    if (l && l.done) { setLog(h.id, date, null); afterLog(h, date, `${h.name} cleared`, snap); return; }
+    if (date === todayStr()) { setLog(h.id, date, { done: true, at: new Date().toISOString() }); afterLog(h, date, `${h.emoji} ${h.name} at ${fmtTime(new Date().toISOString())}`, snap); }
+    else timeSheet(h, date);
+    return;
+  }
+  if (h.mode === 'value') { valueSheet(h, date); return; }
+  if (h.mode === 'count') {
+    const l = getLog(h.id, date) || { total: 0, events: [] };
+    const step = h.count.step || 1;
+    if (!h.count.allowOver && (l.total || 0) >= h.count.target) { toast(`${h.name} already at target (${fmtNum(h.count.target)} ${h.count.unit})`); countSheet(h, date); return; }
+    const total = Math.round(((l.total || 0) + step) * 1000) / 1000;
+    const events = (l.events || []).concat([{ d: step, at: new Date().toISOString() }]);
+    setLog(h.id, date, Object.assign({}, l, { total, events, done: total >= h.count.target }));
+    const met = total >= h.count.target;
+    afterLog(h, date, `${h.emoji} ${h.name} ${fmtNum(total)}/${fmtNum(h.count.target)}${met ? ' · target reached' : ''}`, snap);
+    return;
+  }
+}
+function timeSheet(h, date) {
+  const l = getLog(h.id, date); const cur = l && l.at ? new Date(l.at) : null;
+  const body = el(`<div class="numpad"><div class="field"><label for="tIn">Completion time on ${esc(date)}</label><input id="tIn" type="time" value="${cur ? pad(cur.getHours()) + ':' + pad(cur.getMinutes()) : '12:00'}"></div><div class="two"><button class="btn danger" id="tClear" ${l && l.done ? '' : 'disabled'}>Clear</button><button class="btn primary" id="tSave">Save</button></div></div>`);
+  const snap = snapshot(h, date);
+  body.querySelector('#tSave').addEventListener('click', () => { const v = body.querySelector('#tIn').value; if (!v) return; const [hh, mm] = v.split(':').map(Number); const d = parseDate(date); d.setHours(hh, mm, 0, 0); setLog(h.id, date, { done: true, at: d.toISOString() }); Sheet.close(); afterLog(h, date, `${h.emoji} ${h.name} at ${fmtTime(d.toISOString())}`, snap); });
+  body.querySelector('#tClear').addEventListener('click', () => { setLog(h.id, date, null); Sheet.close(); afterLog(h, date, `${h.name} cleared`, snap); });
+  Sheet.open(h.emoji + ' ' + h.name, body, { cancelLabel: 'Cancel' });
+}
+function valueSheet(h, date) {
+  const l = getLog(h.id, date); const cur = l ? l.value : null; const f = h.value.format;
+  let inputHtml;
+  if (f === 'time') inputHtml = `<input id="vIn" type="time" value="${cur != null ? pad(Math.floor(cur / 60) % 24) + ':' + pad(cur % 60) : ''}">`;
+  else if (f === 'duration') inputHtml = `<div class="two"><div class="field"><label for="vH">Hours</label><input id="vH" type="number" inputmode="decimal" min="0" step="1" value="${cur != null ? Math.floor(cur / 60) : ''}"></div><div class="field"><label for="vM">Minutes</label><input id="vM" type="number" inputmode="numeric" min="0" max="59" step="1" value="${cur != null ? Math.round(cur % 60) : ''}"></div></div>`;
+  else inputHtml = `<input id="vIn" type="number" inputmode="decimal" step="any" placeholder="${esc(h.value.unit || 'value')}" value="${cur != null ? cur : ''}">`;
+  const tgt = h.value.target != null ? `<div class="help">Target: ${h.value.cmp === '>=' ? 'at least' : 'at most'} ${esc(fmtValue(h, h.value.target))}</div>` : '';
+  const body = el(`<div class="numpad"><div class="field"><label>Value for ${esc(date)}${h.value.unit && f === 'number' ? ' (' + esc(h.value.unit) + ')' : ''}</label>${inputHtml}${tgt}</div><div class="two"><button class="btn danger" id="vClear" ${cur != null ? '' : 'disabled'}>Clear</button><button class="btn primary" id="vSave">Save</button></div></div>`);
+  const snap = snapshot(h, date);
+  const read = () => {
+    if (f === 'time') { const v = body.querySelector('#vIn').value; if (!v) return null; const [hh, mm] = v.split(':').map(Number); return hh * 60 + mm; }
+    if (f === 'duration') { const hh = parseFloat(body.querySelector('#vH').value) || 0, mm = parseFloat(body.querySelector('#vM').value) || 0; if (!body.querySelector('#vH').value && !body.querySelector('#vM').value) return null; return Math.round(hh * 60 + mm); }
+    const v = body.querySelector('#vIn').value.trim(); if (v === '') return null; const n = Number(v); return isNaN(n) ? null : n;
+  };
+  body.querySelector('#vSave').addEventListener('click', () => { const v = read(); if (v == null) { toast('Enter a value first.'); return; } setLog(h.id, date, { value: v, at: new Date().toISOString() }); Sheet.close(); const met = h.value.target != null ? (meetsTarget(h, v) ? ' · target met' : ' · target not met') : ''; afterLog(h, date, `${h.emoji} ${h.name}: ${fmtValue(h, v)}${met}`, snap); });
+  body.querySelector('#vClear').addEventListener('click', () => { setLog(h.id, date, null); Sheet.close(); afterLog(h, date, `${h.name} cleared`, snap); });
+  Sheet.open(h.emoji + ' ' + h.name, body, { cancelLabel: 'Cancel' });
+  setTimeout(() => { const i = body.querySelector('input'); if (i && f === 'number') i.focus(); }, 300);
+}
+function countSheet(h, date) {
+  const l0 = getLog(h.id, date) || { total: 0, events: [] };
+  let total = l0.total || 0; const step = h.count.step || 1; const snap = snapshot(h, date);
+  const body = el(`<div class="numpad"><div class="stepper"><button id="cMinus" aria-label="Decrease">−</button><div class="total" id="cTot"></div><button id="cPlus" aria-label="Increase">+</button></div><div class="small muted" style="text-align:center">Target ${fmtNum(h.count.target)} ${esc(h.count.unit)} · ±${fmtNum(step)} per tap</div><div class="field"><label for="cIn">Set total manually</label><input id="cIn" type="number" inputmode="decimal" step="any" min="0" value="${total}"></div><div class="two"><button class="btn danger" id="cClear">Clear</button><button class="btn primary" id="cSave">Save</button></div></div>`);
+  const upd = () => { body.querySelector('#cTot').textContent = fmtNum(total); body.querySelector('#cTot').style.color = total >= h.count.target ? 'var(--accent)' : ''; body.querySelector('#cIn').value = total; };
+  upd();
+  body.querySelector('#cPlus').addEventListener('click', () => { total = Math.round((total + step) * 1000) / 1000; upd(); haptic(8); });
+  body.querySelector('#cMinus').addEventListener('click', () => { total = Math.max(0, Math.round((total - step) * 1000) / 1000); upd(); haptic(8); });
+  body.querySelector('#cIn').addEventListener('input', e => { const n = parseFloat(e.target.value); if (!isNaN(n) && n >= 0) total = n; });
+  body.querySelector('#cSave').addEventListener('click', () => { const ev = (l0.events || []).concat([{ d: total - (l0.total || 0), at: new Date().toISOString(), manual: true }]); setLog(h.id, date, Object.assign({}, l0, { total, events: ev, done: total >= h.count.target })); Sheet.close(); afterLog(h, date, `${h.emoji} ${h.name} set to ${fmtNum(total)}/${fmtNum(h.count.target)}`, snap); });
+  body.querySelector('#cClear').addEventListener('click', () => { setLog(h.id, date, null); Sheet.close(); afterLog(h, date, `${h.name} cleared`, snap); });
+  Sheet.open(h.emoji + ' ' + h.name, body, { cancelLabel: 'Cancel' });
+}
+
+/* ========== Habit menu ========== */
+function habitMenu(h, date) {
+  const ico = { stats: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="3"/><path d="M8 16v-5M12 16V8M16 16v-3"/></svg>', edit: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/></svg>', adj: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 7h16M4 12h10M4 17h6"/></svg>', del: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M8 6V4h8v2M6 6l1 14h10l1-14"/></svg>' };
+  const future = date > todayStr();
+  const body = el(`<div class="menu"></div>`);
+  const add = (label, icon, fn, cls) => { const b = el(`<button class="${cls || ''}">${icon}<span>${esc(label)}</span></button>`); b.addEventListener('click', () => { Sheet.close(); fn(); }); body.append(b); };
+  if (!future && h.mode === 'count') add('Adjust total for ' + date, ico.adj, () => countSheet(h, date));
+  if (!future && h.mode === 'value') add('Edit value for ' + date, ico.adj, () => valueSheet(h, date));
+  if (!future && h.mode === 'time') add('Edit time for ' + date, ico.adj, () => timeSheet(h, date));
+  add('View statistics', ico.stats, () => { S.ui.detailHabit = h.id; showScreen('detail'); });
+  add('Edit habit', ico.edit, () => habitForm(h));
+  add('Delete habit', ico.del, () => deleteHabitSheet(h), 'danger');
+  Sheet.open(h.emoji + ' ' + h.name, body);
+}
+function deleteHabitSheet(h) {
+  const body = el(`<div style="display:flex;flex-direction:column;gap:12px"><div class="note-box">Remove <b>${esc(h.name)}</b> from your list? Its history stays available in Statistics unless you also delete it.</div><button class="btn block" id="dKeep">Delete habit, keep history</button><button class="btn block danger" id="dAll">Delete habit and all history</button></div>`);
+  body.querySelector('#dKeep').addEventListener('click', () => { h.deletedAt = todayStr(); persist('habits'); Sheet.close(); renderHome(); toast(`${h.name} removed`); });
+  body.querySelector('#dAll').addEventListener('click', () => { S.habits = S.habits.filter(x => x.id !== h.id); delete S.logs[h.id]; persist('habits'); persist('logs'); Sheet.close(); renderHome(); toast(`${h.name} and its history deleted`); });
+  Sheet.open('Delete habit', body, { cancelLabel: 'Cancel' });
+}
+
+/* ========== Drag reorder (long-press on number cell) ========== */
+function attachDrag(row, h) {
+  const handle = row.querySelector('.c-num');
+  let timer = null, dragging = false, startY = 0, ph = null;
+  const onMove = e => {
+    if (!dragging) { if (Math.abs(e.clientY - startY) > 8) { clearTimeout(timer); cleanup(); } return; }
+    e.preventDefault();
+    const under = document.elementFromPoint(e.clientX, e.clientY);
+    const target = under && under.closest('.hrow');
+    $$('.hrow').forEach(r => r.classList.remove('drop-before', 'drop-after'));
+    if (target && target !== row) { const rect = target.getBoundingClientRect(); target.classList.add(e.clientY < rect.top + rect.height / 2 ? 'drop-before' : 'drop-after'); }
+  };
+  const onUp = e => {
+    if (dragging) {
+      const under = document.elementFromPoint(e.clientX, e.clientY);
+      const target = under && under.closest('.hrow');
+      if (target && target !== row) {
+        const rect = target.getBoundingClientRect(); const before = e.clientY < rect.top + rect.height / 2;
+        const ids = $$('.hrow').map(r => r.dataset.id).filter(id => id !== h.id);
+        const idx = ids.indexOf(target.dataset.id); ids.splice(before ? idx : idx + 1, 0, h.id);
+        // apply order: keep habits not visible in their relative positions
+        const vis = new Set(ids); const all = activeHabits();
+        const merged = []; let vi = 0;
+        all.forEach(x => { if (vis.has(x.id)) { while (vi < ids.length && merged.includes(habitById(ids[vi]))) vi++; merged.push(habitById(ids[vi++])); } else merged.push(x); });
+        merged.forEach((x, i) => { x.order = i; });
+        persist('habits'); haptic(10);
+      }
+      renderTable();
+    }
+    cleanup();
+  };
+  const cleanup = () => { clearTimeout(timer); dragging = false; row.classList.remove('dragging'); $$('.hrow').forEach(r => r.classList.remove('drop-before', 'drop-after')); window.removeEventListener('pointermove', onMove); window.removeEventListener('pointerup', onUp); window.removeEventListener('pointercancel', onUp); };
+  handle.addEventListener('pointerdown', e => {
+    startY = e.clientY; e.preventDefault();
+    window.addEventListener('pointermove', onMove, { passive: false }); window.addEventListener('pointerup', onUp); window.addEventListener('pointercancel', onUp);
+    timer = setTimeout(() => { dragging = true; row.classList.add('dragging'); haptic(15); try { handle.setPointerCapture(e.pointerId); } catch (x) {} }, 220);
+  });
+}
+
+/* ========== Month calendar sheet ========== */
+function monthCalendar(ym, selected, onPick, opts = {}) {
+  const wrap = el(`<div class="cal"><div class="cal-h"><button class="icon-btn" id="cPrev" aria-label="Previous month"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M15 6l-6 6 6 6"/></svg></button><span class="ttl" id="cTtl"></span><div class="row"><button class="chip" id="cToday">Today</button><button class="icon-btn" id="cNext" aria-label="Next month"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></button></div></div><div class="cal-dow">${DAYS.map(d => `<span>${d}</span>`).join('')}</div><div class="cal-grid" id="cGrid"></div></div>`);
+  let cur = ym;
+  const draw = () => {
+    const [y, m] = cur.split('-').map(Number);
+    wrap.querySelector('#cTtl').textContent = MONTHS[m - 1] + ' ' + y;
+    const g = wrap.querySelector('#cGrid'); g.innerHTML = '';
+    const first = dow(cur + '-01'); const n = daysInMonth(y, m - 1); const t = todayStr();
+    const prevN = daysInMonth(y, m - 2);
+    for (let i = 0; i < first; i++) { const d = prevN - first + 1 + i; g.append(el(`<button class="other" disabled>${d}</button>`)); }
+    for (let d = 1; d <= n; d++) {
+      const ds = cur + '-' + pad(d);
+      const sc = dayScore(ds); const hasLog = S.habits.some(h => getLog(h.id, ds));
+      const c = scoreColor(sc.pct);
+      const b = el(`<button class="${ds === t ? 'today' : ''} ${ds === selected ? 'sel' : ''} ${ds > t ? 'future' : ''}">${d}${hasLog ? `<span class="dot ${c || ''}"></span>` : ''}</button>`);
+      b.addEventListener('click', () => onPick(ds));
+      g.append(b);
+    }
+  };
+  wrap.querySelector('#cPrev').addEventListener('click', () => { cur = addMonths(cur, -1); draw(); });
+  wrap.querySelector('#cNext').addEventListener('click', () => { cur = addMonths(cur, 1); draw(); });
+  wrap.querySelector('#cToday').addEventListener('click', () => { onPick(todayStr()); });
+  draw();
+  return wrap;
+}
+$('#monthBtn').addEventListener('click', () => {
+  const cal = monthCalendar(monthKey(S.ui.date), S.ui.date, ds => { S.ui.date = ds; S.ui.weekStart = weekStart(ds); Sheet.close(); renderHome(); });
+  Sheet.open('Pick a date', cal);
+});
+$('#todayBtn').addEventListener('click', () => { S.ui.date = todayStr(); S.ui.weekStart = weekStart(S.ui.date); renderHome(); });
+$('#fab').addEventListener('click', () => habitForm(null));
+/* ========== Habit form ========== */
+const EMOJIS = ['✅', '☀️', '🌙', '💧', '🥛', '💛', '💪', '🏃', '🚶', '🧘', '🛏️', '📖', '📚', '✍️', '💊', '🥗', '🍎', '🚭', '🧹', '🪥', '🧴', '🎯', '💰', '🎹', '🎨', '🧠', '📵', '🙏', '🌱', '⏰', '🧊', '🔥'];
+const UNITS = ['', 'kg', 'lb', 'hours', 'minutes', 'steps', 'glasses', 'ml', 'km', 'mi', 'pages', 'times'];
+function habitForm(existing) {
+  const h = existing ? clone(existing) : DEFAULT_HABIT();
+  if (!h.value) h.value = DEFAULT_HABIT().value; if (!h.count) h.count = DEFAULT_HABIT().count;
+  const body = el(`<div style="display:flex;flex-direction:column;gap:18px">
+    <div class="emoji-big" id="fEmojiBig">${esc(h.emoji)}<input id="fEmojiIn" aria-label="Emoji" inputmode="text" autocomplete="off"></div>
+    <div class="small muted" style="text-align:center;margin-top:-10px">Tap the emoji to type any emoji from your keyboard</div>
+    <div class="emoji-grid" id="fEmojiGrid"></div>
+    <div class="field"><label for="fName">Habit name</label><input id="fName" placeholder="e.g. Drink Water" value="${esc(h.name)}" autocomplete="off"></div>
+    <div class="field"><label for="fNote">Notes / timing instructions</label><input id="fNote" placeholder="e.g. Right out of bed" value="${esc(h.note)}" autocomplete="off"><div class="help">Shown in the second column. Optional.</div></div>
+    <div class="field"><span class="lbl">Time of day</span><div class="seg" id="fTime"><button data-v="any">Anytime</button><button data-v="morning">Morning</button><button data-v="afternoon">Afternoon</button><button data-v="evening">Evening</button></div></div>
+    <div class="field"><span class="lbl">Tags</span><div class="pills" id="fTags"></div></div>
+    <div class="field"><span class="lbl">Repeat</span><div class="seg wrap" id="fSched"><button data-v="daily">Every day</button><button data-v="weekdays">Selected days</button><button data-v="weekly">Times per week</button><button data-v="monthly">Times per month</button></div>
+      <div id="fDays" class="days7"></div>
+      <div id="fFreq" class="row"><span class="muted small grow" id="fFreqLbl">Target per week</span><input id="fFreqIn" type="number" inputmode="numeric" min="1" max="31" style="width:90px" value="${h.schedule.target || 3}"></div>
+      <div class="help" id="fSchedHelp"></div></div>
+    <div class="field"><span class="lbl">Tracking mode</span><div class="seg wrap" id="fMode"><button data-v="check">Emoji check</button><button data-v="time">Auto timestamp</button><button data-v="value">Single value</button><button data-v="count">Cumulative count</button></div><div class="help" id="fModeHelp"></div></div>
+    <div id="fValue" style="display:flex;flex-direction:column;gap:12px">
+      <div class="field"><span class="lbl">Value format</span><div class="seg" id="fVFormat"><button data-v="number">Number</button><button data-v="time">Clock time</button><button data-v="duration">Duration</button></div></div>
+      <div class="two" id="fVUnitWrap"><div class="field"><label for="fVUnit">Unit</label><input id="fVUnit" list="unitList" placeholder="kg, hours, steps…" value="${esc(h.value.unit)}"></div><div class="field"><label for="fVTarget">Target (optional)</label><input id="fVTarget" type="number" inputmode="decimal" step="any" value="${h.value.target != null && h.value.format === 'number' ? h.value.target : ''}"></div></div>
+      <div class="two" id="fVTimeWrap"><div class="field"><label for="fVTargetT">Target time (optional)</label><input id="fVTargetT" type="time" value="${h.value.target != null && h.value.format === 'time' ? pad(Math.floor(h.value.target / 60)) + ':' + pad(h.value.target % 60) : ''}"></div><div class="field"><label for="fVTargetD">Target hours (optional)</label><input id="fVTargetD" type="number" inputmode="decimal" step="0.25" min="0" value="${h.value.target != null && h.value.format === 'duration' ? (h.value.target / 60) : ''}"></div></div>
+      <div class="field"><span class="lbl">Target means</span><div class="seg" id="fVCmp"><button data-v="<=">At most</button><button data-v=">=">At least</button></div></div>
+      <div class="field"><span class="lbl">Counts as done when</span><div class="seg" id="fVSuccess"><button data-v="record">A value is recorded</button><button data-v="target">Target is met</button></div></div>
+    </div>
+    <div id="fCount" style="display:flex;flex-direction:column;gap:12px">
+      <div class="two"><div class="field"><label for="fCTarget">Daily target</label><input id="fCTarget" type="number" inputmode="decimal" step="any" min="0" value="${h.count.target}"></div><div class="field"><label for="fCUnit">Unit</label><input id="fCUnit" list="unitList" placeholder="glasses, steps…" value="${esc(h.count.unit)}"></div></div>
+      <div class="field"><label for="fCStep">Added per tap</label><input id="fCStep" type="number" inputmode="decimal" step="any" min="0" value="${h.count.step}"></div>
+      <div class="toggle"><span>Allow going past the target</span><button class="switch ${h.count.allowOver ? 'on' : ''}" id="fCOver" role="switch" aria-checked="${h.count.allowOver}" aria-label="Allow exceeding target"></button></div>
+      <div class="field"><span class="lbl">Counts as done when</span><div class="seg" id="fCComplete"><button data-v="target">Target reached</button><button data-v="any">Any amount logged</button></div></div>
+    </div>
+    <div class="toggle"><div><div>Track streak</div><div class="help">Shows 🔥 with consecutive successful periods.</div></div><button class="switch ${h.streak ? 'on' : ''}" id="fStreak" role="switch" aria-checked="${h.streak}" aria-label="Track streak"></button></div>
+    <datalist id="unitList">${UNITS.filter(Boolean).map(u => `<option value="${u}">`).join('')}</datalist>
+  </div>`);
+  // emoji
+  const big = body.querySelector('#fEmojiBig'), ein = body.querySelector('#fEmojiIn');
+  const setEmoji = e => { h.emoji = e; big.firstChild.textContent = e; body.querySelectorAll('#fEmojiGrid button').forEach(b => b.classList.toggle('on', b.textContent === e)); };
+  ein.addEventListener('input', () => { const v = Array.from(ein.value.trim()); if (v.length) setEmoji(v[v.length - 1]); ein.value = ''; });
+  const grid = body.querySelector('#fEmojiGrid');
+  EMOJIS.forEach(e => { const b = el(`<button type="button" aria-label="${e}">${e}</button>`); b.addEventListener('click', () => setEmoji(e)); grid.append(b); });
+  setEmoji(h.emoji);
+  // seg helper
+  const seg = (id, get, set, onChange) => { const s = body.querySelector(id); s.querySelectorAll('button').forEach(b => { b.classList.toggle('on', b.dataset.v === String(get())); b.addEventListener('click', () => { set(b.dataset.v); s.querySelectorAll('button').forEach(x => x.classList.toggle('on', x === b)); if (onChange) onChange(); }); }); };
+  seg('#fTime', () => h.timeOfDay, v => h.timeOfDay = v);
+  // tags
+  const tagsEl = body.querySelector('#fTags');
+  const drawTags = () => {
+    tagsEl.innerHTML = '';
+    S.tags.forEach(t => { const b = el(`<button type="button" class="chip tag ${h.tags.includes(t.id) ? 'on' : ''}">${esc(t.emoji ? t.emoji + ' ' : '')}${esc(t.name)}</button>`); b.addEventListener('click', () => { if (h.tags.includes(t.id)) h.tags = h.tags.filter(x => x !== t.id); else h.tags.push(t.id); drawTags(); }); tagsEl.append(b); });
+    const add = el(`<button type="button" class="chip add">+ New tag</button>`);
+    add.addEventListener('click', () => { const row = el(`<div class="tagrow" style="width:100%"><input class="emo" placeholder="💪" aria-label="Tag emoji"><input placeholder="Tag name" aria-label="Tag name"><button type="button" class="btn primary" style="min-height:40px">Add</button></div>`); row.querySelector('.btn').addEventListener('click', () => { const nm = row.querySelectorAll('input')[1].value.trim(); if (!nm) return; const t = { id: uid(), name: nm, emoji: row.querySelector('.emo').value.trim() }; S.tags.push(t); persist('tags'); h.tags.push(t.id); drawTags(); }); add.replaceWith(row); row.querySelectorAll('input')[1].focus(); });
+    tagsEl.append(add);
+  };
+  drawTags();
+  // schedule
+  const daysEl = body.querySelector('#fDays');
+  DAYS.forEach((d, i) => { const b = el(`<button type="button" class="${h.schedule.days.includes(i) ? 'on' : ''}">${d}</button>`); b.addEventListener('click', () => { if (h.schedule.days.includes(i)) h.schedule.days = h.schedule.days.filter(x => x !== i); else h.schedule.days.push(i); b.classList.toggle('on'); }); daysEl.append(b); });
+  const schedUI = () => {
+    const t = h.schedule.type;
+    daysEl.classList.toggle('hidden', t !== 'weekdays');
+    body.querySelector('#fFreq').classList.toggle('hidden', t !== 'weekly' && t !== 'monthly');
+    body.querySelector('#fFreqLbl').textContent = t === 'weekly' ? 'Target per week' : 'Target per month';
+    body.querySelector('#fSchedHelp').textContent = t === 'daily' ? 'Due every day. Counts toward each day’s score.' : t === 'weekdays' ? 'Due only on the selected days.' : 'Shown every day. Counts toward a day’s score only when you complete it that day, so unscheduled days are never penalised. Progress toward the ' + (t === 'weekly' ? 'weekly' : 'monthly') + ' target is shown separately.';
+  };
+  seg('#fSched', () => h.schedule.type, v => h.schedule.type = v, schedUI); schedUI();
+  // mode
+  const modeUI = () => {
+    body.querySelector('#fValue').classList.toggle('hidden', h.mode !== 'value');
+    body.querySelector('#fCount').classList.toggle('hidden', h.mode !== 'count');
+    body.querySelector('#fModeHelp').textContent = { check: 'Tap to complete; shows the emoji. Tap again to undo.', time: 'Tap to complete and record the exact time, e.g. 6:42 AM.', value: 'Tap to enter one number per day, e.g. weight, sleep hours, wake-up time.', count: 'Each tap adds an amount toward a daily target, e.g. 1 glass toward 8.' }[h.mode];
+  };
+  seg('#fMode', () => h.mode, v => h.mode = v, modeUI); modeUI();
+  const vfUI = () => { const f = h.value.format; body.querySelector('#fVUnitWrap').classList.toggle('hidden', f !== 'number'); body.querySelector('#fVTimeWrap').classList.toggle('hidden', f === 'number'); body.querySelector('#fVTargetT').parentElement.classList.toggle('hidden', f !== 'time'); body.querySelector('#fVTargetD').parentElement.classList.toggle('hidden', f !== 'duration'); };
+  seg('#fVFormat', () => h.value.format, v => h.value.format = v, vfUI); vfUI();
+  seg('#fVCmp', () => h.value.cmp, v => h.value.cmp = v);
+  seg('#fVSuccess', () => h.value.success, v => h.value.success = v);
+  seg('#fCComplete', () => h.count.completeOn, v => h.count.completeOn = v);
+  const sw = (id, get, set) => { const b = body.querySelector(id); b.addEventListener('click', () => { set(!get()); b.classList.toggle('on', get()); b.setAttribute('aria-checked', get()); }); };
+  sw('#fCOver', () => h.count.allowOver, v => h.count.allowOver = v);
+  sw('#fStreak', () => h.streak, v => h.streak = v);
+
+  const save = () => {
+    h.name = body.querySelector('#fName').value.trim();
+    if (!h.name) { toast('Give the habit a name.'); body.querySelector('#fName').focus(); return; }
+    h.note = body.querySelector('#fNote').value.trim();
+    if (h.schedule.type === 'weekdays' && !h.schedule.days.length) { toast('Pick at least one day.'); return; }
+    if (h.schedule.type === 'weekly' || h.schedule.type === 'monthly') { h.schedule.target = Math.max(1, parseInt(body.querySelector('#fFreqIn').value) || 1); }
+    if (h.mode === 'value') {
+      h.value.unit = body.querySelector('#fVUnit').value.trim();
+      if (h.value.format === 'number') { const t = body.querySelector('#fVTarget').value.trim(); h.value.target = t === '' ? null : Number(t); }
+      else if (h.value.format === 'time') { const t = body.querySelector('#fVTargetT').value; h.value.target = t ? (Number(t.split(':')[0]) * 60 + Number(t.split(':')[1])) : null; }
+      else { const t = body.querySelector('#fVTargetD').value.trim(); h.value.target = t === '' ? null : Math.round(Number(t) * 60); }
+      if (h.value.target == null) h.value.success = 'record';
+    }
+    if (h.mode === 'count') {
+      h.count.target = Math.max(0.001, parseFloat(body.querySelector('#fCTarget').value) || 1);
+      h.count.unit = body.querySelector('#fCUnit').value.trim();
+      h.count.step = Math.max(0.001, parseFloat(body.querySelector('#fCStep').value) || 1);
+    }
+    if (existing) { const idx = S.habits.findIndex(x => x.id === existing.id); S.habits[idx] = h; }
+    else { h.order = S.habits.length ? Math.max(...S.habits.map(x => x.order)) + 1 : 0; S.habits.push(h); }
+    persist('habits'); Sheet.close(); renderHome(); toast(existing ? `${h.name} updated` : `${h.emoji} ${h.name} added`);
+  };
+  Sheet.open(existing ? 'Edit habit' : 'New habit', body, { cancelLabel: 'Cancel', primary: 'Save', onPrimary: save });
+  if (!existing) setTimeout(() => body.querySelector('#fName').focus(), 350);
+}
+
+/* ========== Settings ========== */
+$('#settingsBtn').addEventListener('click', settingsSheet);
+function settingsSheet() {
+  const s = S.settings;
+  const body = el(`<div style="display:flex;flex-direction:column;gap:18px">
+    <div class="field range"><label for="sThr">Green-light threshold: <b id="sThrV">${s.threshold}%</b></label><input id="sThr" type="range" min="50" max="100" step="5" value="${s.threshold}"><div class="help">A day is green when its completion reaches this. Red below 50%, yellow from 50% to just under the threshold.</div></div>
+    <div class="field"><span class="lbl">Completed habits on Home</span><div class="seg" id="sBeh"><button data-v="bottom">Move to bottom</button><button data-v="hide">Hide</button><button data-v="stay">Keep in place</button></div></div>
+    <div class="field"><span class="lbl">Tags</span><div class="list" id="sTags"></div><button class="btn" id="sTagAdd">+ New tag</button></div>
+    <div class="field"><span class="lbl">How scoring works</span><div class="note-box">Daily and selected-day habits count toward each day they are due. <b>Times-per-week</b> and <b>times-per-month</b> goals appear every day but only count toward a day when completed that day, so skipped days never lower the score. Cumulative habits count as done when the target is reached (or when any amount is logged, if you chose that). Streaks follow each habit’s own schedule.</div></div>
+    <div class="field"><span class="lbl">Backup &amp; restore</span><div class="note-box">Data is saved <b>on this device only</b> (IndexedDB in Safari). Backups are <b>manual</b>: export a JSON file and keep it in iCloud Drive or Files. Restore it on any device with Import. Last export: <b id="sLast">${s.lastBackup ? esc(new Date(s.lastBackup).toLocaleString()) : 'never'}</b></div>
+      <div class="two"><button class="btn primary" id="sExport">Export JSON</button><button class="btn" id="sCsv">Export CSV</button></div>
+      <button class="btn block file-btn" id="sImport">Import JSON backup<input type="file" accept="application/json,.json" aria-label="Import backup"></button>
+      <button class="btn block" id="sCopy">Copy JSON to clipboard</button></div>
+    <div class="field"><span class="lbl">About</span><div class="note-box">Add to Home Screen from Safari’s share menu for an app-like experience. Notifications and background sync are not available in a web app on iPhone; open the app to log.</div></div>
+  </div>`);
+  body.querySelector('#sThr').addEventListener('input', e => { s.threshold = Number(e.target.value); body.querySelector('#sThrV').textContent = s.threshold + '%'; persist('settings'); });
+  body.querySelectorAll('#sBeh button').forEach(b => { b.classList.toggle('on', b.dataset.v === s.completedBehavior); b.addEventListener('click', () => { s.completedBehavior = b.dataset.v; persist('settings'); body.querySelectorAll('#sBeh button').forEach(x => x.classList.toggle('on', x === b)); }); });
+  const drawTags = () => {
+    const l = body.querySelector('#sTags'); l.innerHTML = '';
+    if (!S.tags.length) l.append(el('<div class="li muted">No tags yet.</div>'));
+    S.tags.forEach(t => {
+      const li = el(`<div class="li"><input class="emo" style="width:54px;text-align:center;min-height:38px;padding:4px" value="${esc(t.emoji)}" aria-label="Tag emoji"><input style="min-height:38px;padding:6px 10px" value="${esc(t.name)}" aria-label="Tag name"><button class="icon-btn ghost" aria-label="Delete tag"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M8 6V4h8v2M6 6l1 14h10l1-14"/></svg></button></div>`);
+      const [ie, inm] = li.querySelectorAll('input');
+      ie.addEventListener('change', () => { t.emoji = ie.value.trim(); persist('tags'); });
+      inm.addEventListener('change', () => { const v = inm.value.trim(); if (v) { t.name = v; persist('tags'); } else inm.value = t.name; });
+      li.querySelector('button').addEventListener('click', () => { S.tags = S.tags.filter(x => x.id !== t.id); S.habits.forEach(h => { h.tags = h.tags.filter(x => x !== t.id); }); if (S.ui.tagFilter === t.id) S.ui.tagFilter = null; persist('tags'); persist('habits'); drawTags(); toast(`Tag "${t.name}" deleted`); });
+      l.append(li);
+    });
+  };
+  drawTags();
+  body.querySelector('#sTagAdd').addEventListener('click', () => { S.tags.push({ id: uid(), name: 'New tag', emoji: '' }); persist('tags'); drawTags(); const last = body.querySelectorAll('#sTags .li input')[S.tags.length * 2 - 1]; if (last) { last.focus(); last.select(); } });
+  body.querySelector('#sExport').addEventListener('click', () => exportJSON(body));
+  body.querySelector('#sCsv').addEventListener('click', () => exportCSV());
+  body.querySelector('#sCopy').addEventListener('click', () => { const txt = JSON.stringify(exportData(), null, 1); try { navigator.clipboard.writeText(txt).then(() => toast('Backup JSON copied'), () => toast('Clipboard blocked here. Use Export instead.')); } catch (e) { toast('Clipboard blocked here. Use Export instead.'); } });
+  body.querySelector('#sImport input').addEventListener('change', e => { const f = e.target.files[0]; if (!f) return; const r = new FileReader(); r.onload = () => importJSON(r.result); r.readAsText(f); });
+  Sheet.open('Settings', body, { onClose: () => { renderHome(); } });
+}
+function exportData() { return { app: 'my-routines', version: 1, exportedAt: new Date().toISOString(), settings: S.settings, tags: S.tags, habits: S.habits, logs: S.logs }; }
+function download(name, text, type) {
+  try {
+    const blob = new Blob([text], { type: type || 'application/json' }); const url = URL.createObjectURL(blob);
+    const a = document.createElement('a'); a.href = url; a.download = name; document.body.append(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(url), 2000);
+    return true;
+  } catch (e) { return false; }
+}
+function exportJSON(body) {
+  const ok = download('routines-backup-' + todayStr() + '.json', JSON.stringify(exportData(), null, 1));
+  if (ok) { S.settings.lastBackup = new Date().toISOString(); persist('settings'); if (body) body.querySelector('#sLast').textContent = new Date().toLocaleString(); toast('Backup file created. Save it to Files or iCloud Drive.'); }
+  else toast('Download blocked here. Use "Copy JSON" instead.');
+}
+function exportCSV() {
+  const rows = [['habit_id', 'habit', 'emoji', 'mode', 'date', 'done', 'value', 'unit', 'total', 'target', 'timestamp']];
+  S.habits.forEach(h => { const L = S.logs[h.id] || {}; Object.keys(L).sort().forEach(d => { const l = L[d]; rows.push([h.id, h.name, h.emoji, h.mode, d, isDone(h, d) ? 1 : 0, l.value != null ? l.value : '', h.mode === 'value' ? (h.value.format === 'number' ? h.value.unit : h.value.format) : h.mode === 'count' ? h.count.unit : '', l.total != null ? l.total : '', h.mode === 'count' ? h.count.target : (h.mode === 'value' && h.value.target != null ? h.value.target : ''), l.at || '']); }); });
+  const csv = rows.map(r => r.map(v => '"' + String(v).replace(/"/g, '""') + '"').join(',')).join('\n');
+  if (!download('routines-logs-' + todayStr() + '.csv', csv, 'text/csv')) toast('Download blocked here.');
+}
+function importJSON(text) {
+  let data; try { data = JSON.parse(text); } catch (e) { toast('That file is not valid JSON.'); return; }
+  if (!data || data.app !== 'my-routines' || !Array.isArray(data.habits)) { toast('Not a My Routines backup.'); return; }
+  const body = el(`<div style="display:flex;flex-direction:column;gap:12px"><div class="note-box">Backup from <b>${esc(data.exportedAt ? new Date(data.exportedAt).toLocaleString() : 'unknown date')}</b>: ${data.habits.length} habits, ${Object.values(data.logs || {}).reduce((n, o) => n + Object.keys(o).length, 0)} log entries.</div><button class="btn block primary" id="iMerge">Merge into current data</button><button class="btn block danger" id="iReplace">Replace everything with this backup</button><div class="help">Merge keeps your current entries and adds anything new from the backup (backup wins on the same habit and date).</div></div>`);
+  const finish = () => { ['habits', 'tags', 'logs', 'settings'].forEach(persist); Sheet.close(); renderHome(); toast('Backup restored'); };
+  body.querySelector('#iReplace').addEventListener('click', () => { S.habits = data.habits; S.tags = data.tags || []; S.logs = data.logs || {}; S.settings = Object.assign(S.settings, data.settings || {}); finish(); });
+  body.querySelector('#iMerge').addEventListener('click', () => {
+    (data.tags || []).forEach(t => { if (!S.tags.some(x => x.id === t.id)) S.tags.push(t); });
+    data.habits.forEach(h => { const i = S.habits.findIndex(x => x.id === h.id); if (i >= 0) S.habits[i] = h; else S.habits.push(h); });
+    Object.keys(data.logs || {}).forEach(hid => { S.logs[hid] = Object.assign(S.logs[hid] || {}, data.logs[hid]); });
+    finish();
+  });
+  Sheet.open('Restore backup', body, { cancelLabel: 'Cancel' });
+}
+/* ========== Statistics ========== */
+$$('#statTabs button').forEach(b => b.addEventListener('click', () => { S.ui.statTab = b.dataset.t; $$('#statTabs button').forEach(x => x.classList.toggle('on', x === b)); renderStats(); }));
+function statHabits(date) { return S.habits.filter(h => (S.ui.statTag == null || h.tags.includes(S.ui.statTag))); }
+function tagFilterBar(onChange) {
+  const f = el('<div class="filters" style="padding:0"></div>');
+  const all = el(`<button class="chip tag ${S.ui.statTag == null ? 'on' : ''}">All</button>`); all.addEventListener('click', () => { S.ui.statTag = null; onChange(); }); f.append(all);
+  S.tags.forEach(t => { const b = el(`<button class="chip tag ${S.ui.statTag === t.id ? 'on' : ''}">${esc(t.emoji ? t.emoji + ' ' : '')}${esc(t.name)}</button>`); b.addEventListener('click', () => { S.ui.statTag = S.ui.statTag === t.id ? null : t.id; onChange(); }); f.append(b); });
+  return f;
+}
+function pnav(title, onPrev, onNext) {
+  const n = el(`<div class="pnav"><button class="icon-btn" aria-label="Previous"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M15 6l-6 6 6 6"/></svg></button><span class="ttl">${esc(title)}</span><button class="icon-btn" aria-label="Next"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></button></div>`);
+  const [p, x] = n.querySelectorAll('button'); p.addEventListener('click', onPrev); x.addEventListener('click', onNext); return n;
+}
+function monthTitle(ym) { const [y, m] = ym.split('-').map(Number); return MONTHS[m - 1] + ' ' + y; }
+function weekTitle(ws) { const a = parseDate(ws), b = parseDate(addDays(ws, 6)); return MONTHS_S[a.getMonth()] + ' ' + a.getDate() + ' – ' + (a.getMonth() === b.getMonth() ? '' : MONTHS_S[b.getMonth()] + ' ') + b.getDate(); }
+
+/* day status for a habit: 'ok' | 'miss' | 'na' (not scheduled / before creation) | 'future' */
+function habitDayStatus(h, d) {
+  const t = todayStr();
+  if (!existsOn(h, d)) return 'na';
+  if (d > t) return 'future';
+  if (isFlex(h)) return isDone(h, d) ? 'ok' : 'na';
+  if (!isScheduled(h, d)) return 'na';
+  return isDone(h, d) ? 'ok' : 'miss';
+}
+function miniCal(h, days) {
+  const first = dow(days[0]);
+  let html = '<div class="mini">';
+  for (let i = 0; i < first; i++) html += '<span class="blank"></span>';
+  days.forEach(d => { const s = habitDayStatus(h, d); html += `<span class="${s === 'ok' ? 'ok' : s === 'miss' ? '' : 'na'}" title="${d}">${s === 'ok' ? '✓' : ''}</span>`; });
+  return html + '</div>';
+}
+function habitMonthStats(h, ym) {
+  const days = monthDays(ym); let ok = 0, due = 0;
+  days.forEach(d => { const s = habitDayStatus(h, d); if (s === 'ok') { ok++; due++; } else if (s === 'miss') due++; });
+  let periods = null;
+  if (isFlex(h)) { const keys = new Set(); days.forEach(d => { if (existsOn(h, d) && d <= todayStr()) keys.add(periodKey(h, d)); }); let met = 0; keys.forEach(k => { if (periodMet(h, k)) met++; }); periods = { met, total: keys.size }; }
+  return { ok, due, pct: due ? Math.round(ok / due * 100) : null, periods };
+}
+function habitCard(h, days, ym) {
+  const st = habitMonthStats(h, ym);
+  let goal = '';
+  if (isFlex(h)) { const p = periodProgress(h, days[days.length - 1] <= todayStr() ? days[days.length - 1] : todayStr()); goal = h.schedule.type === 'monthly' ? `<div class="meta"><span>Month goal</span><b>${p.n}/${h.schedule.target}</b></div>` : `<div class="meta"><span>Weeks met</span><b>${st.periods.met}/${st.periods.total}</b></div>`; }
+  const c = el(`<button class="scard"><div class="t"><span>${esc(h.emoji)}</span><span class="nm">${esc(h.name)}</span>${h.deletedAt ? '<span class="small dim">(removed)</span>' : ''}</div>${miniCal(h, days)}<div class="meta"><span>${isFlex(h) ? 'Done days' : 'Success'}</span><b>${st.pct == null ? '—' : st.pct + '%'}</b></div><div class="meta"><span>${isFlex(h) ? 'Completed' : 'Days met'}</span><b>${st.ok}${isFlex(h) ? '' : '/' + st.due}</b></div>${goal}</button>`);
+  c.addEventListener('click', () => { S.ui.detailHabit = h.id; showScreen('detail'); });
+  return c;
+}
+function renderStats() {
+  const b = $('#statsBody'); b.innerHTML = '';
+  const tab = S.ui.statTab;
+  if (tab === 'monthly') {
+    b.append(pnav(monthTitle(S.ui.statMonth), () => { S.ui.statMonth = addMonths(S.ui.statMonth, -1); renderStats(); }, () => { S.ui.statMonth = addMonths(S.ui.statMonth, 1); renderStats(); }));
+    b.append(tagFilterBar(renderStats));
+    const days = monthDays(S.ui.statMonth);
+    const hs = statHabits().filter(h => days.some(d => existsOn(h, d))).sort((a, c) => a.order - c.order);
+    if (!hs.length) { b.append(el('<div class="empty"><strong>No habits in this month</strong><span>Logs will appear here once you start.</span></div>')); return; }
+    const grid = el('<div class="cards2"></div>'); hs.forEach(h => grid.append(habitCard(h, days, S.ui.statMonth))); b.append(grid);
+    let green = 0, elig = 0; days.forEach(d => { if (d > todayStr()) return; const s = dayScore(d); if (s.pct != null) { elig++; if (s.pct >= S.settings.threshold) green++; } });
+    b.append(el(`<div class="sumline"><span>Green-check days this month</span><b>${green} <span class="muted small">/ ${elig}</span></b></div>`));
+    b.append(el(`<div class="small dim" style="padding:0 4px">✓ met · gray box = missed · outlined = not scheduled, future, or completed-elsewhere for weekly/monthly goals.</div>`));
+  }
+  if (tab === 'weekly') {
+    b.append(pnav(weekTitle(S.ui.statWeek), () => { S.ui.statWeek = addDays(S.ui.statWeek, -7); renderStats(); }, () => { S.ui.statWeek = addDays(S.ui.statWeek, 7); renderStats(); }));
+    b.append(tagFilterBar(renderStats));
+    const days = weekDays(S.ui.statWeek); const t = todayStr();
+    const hs = statHabits();
+    let sumPct = 0, nPct = 0, done = 0, due = 0, green = 0;
+    const bars = el('<div class="wk-bars"></div>');
+    days.forEach(d => {
+      const s = d > t ? { pct: null, done: 0, due: 0 } : dayScore(d, hs.filter(h => existsOn(h, d)));
+      if (s.pct != null) { sumPct += s.pct; nPct++; if (s.pct >= S.settings.threshold) green++; }
+      done += s.done; due += s.due;
+      bars.append(el(`<div class="col ${d === t ? 'today' : ''}"><span class="p">${s.pct == null ? '' : s.pct + '%'}</span><div class="b" style="height:${s.pct == null ? 3 : Math.max(3, s.pct)}%;background:${s.pct == null ? 'var(--neutral)' : colorVar(scoreColor(s.pct))}"></div><span class="d">${DAYS[dow(d)]}</span></div>`));
+    });
+    b.append(el(`<div class="tiles"><div class="tile"><span class="k">Weekly average</span><span class="v" style="color:${nPct ? colorVar(scoreColor(Math.round(sumPct / nPct))) : ''}">${nPct ? Math.round(sumPct / nPct) + '%' : '—'}</span><span class="s">${nPct} day${nPct === 1 ? '' : 's'} scored</span></div><div class="tile"><span class="k">Completed</span><span class="v">${done}</span><span class="s">of ${due} due</span></div><div class="tile"><span class="k">Green days</span><span class="v" style="color:var(--green)">${green}</span><span class="s">≥ ${S.settings.threshold}%</span></div></div>`));
+    b.append(bars);
+    const flex = hs.filter(h => h.schedule.type === 'weekly' && days.some(d => existsOn(h, d)));
+    if (flex.length) {
+      b.append(el('<div class="section-t">Weekly goals</div>'));
+      const l = el('<div class="list"></div>');
+      flex.forEach(h => { const p = periodProgress(h, S.ui.statWeek); l.append(el(`<div class="li"><span>${esc(h.emoji)}</span><span class="nm">${esc(h.name)}</span><span class="badge goal ${p.n >= p.target ? 'met' : ''}">${p.n}/${p.target}</span></div>`)); });
+      b.append(l);
+    }
+    b.append(el('<div class="section-t">Per day</div>'));
+    const l2 = el('<div class="list"></div>');
+    days.forEach(d => { const s = d > t ? null : dayScore(d, hs.filter(h => existsOn(h, d))); const dd = parseDate(d); l2.append(el(`<div class="li"><span class="nm">${DAYS[dd.getDay()]} ${MONTHS_S[dd.getMonth()]} ${dd.getDate()}</span><span class="v">${s ? s.done + ' / ' + s.due : '—'}</span><span class="badge goal" style="${s && s.pct != null ? 'color:' + colorVar(scoreColor(s.pct)) : ''}">${s && s.pct != null ? s.pct + '%' : d > t ? 'upcoming' : 'no habits'}</span></div>`)); });
+    b.append(l2);
+  }
+  if (tab === 'green') {
+    b.append(pnav(monthTitle(S.ui.statMonth), () => { S.ui.statMonth = addMonths(S.ui.statMonth, -1); renderStats(); }, () => { S.ui.statMonth = addMonths(S.ui.statMonth, 1); renderStats(); }));
+    const days = monthDays(S.ui.statMonth); const t = todayStr();
+    const first = dow(days[0]); let green = 0, elig = 0;
+    const grid = el('<div class="gl-grid"></div>');
+    for (let i = 0; i < first; i++) grid.append(el('<span class="blank"></span>'));
+    const weeks = {};
+    days.forEach(d => {
+      const s = d > t ? null : dayScore(d);
+      let cls = 'na', inner = '';
+      if (s && s.pct != null) { elig++; if (s.pct >= S.settings.threshold) { green++; cls = 'ok'; inner = '✓'; } else cls = ''; }
+      const wk = weekStart(d); weeks[wk] = weeks[wk] || { g: 0, e: 0 }; if (s && s.pct != null) { weeks[wk].e++; if (cls === 'ok') weeks[wk].g++; }
+      grid.append(el(`<span class="${cls}" title="${d}${s && s.pct != null ? ' · ' + s.pct + '%' : ''}"><i>${Number(d.slice(8))}</i>${inner}</span>`));
+    });
+    b.append(el(`<div class="sumline"><span>Green-light days</span><b>${green} <span class="muted small">/ ${elig} scored</span></b></div>`));
+    b.append(el(`<div class="cal-dow">${DAYS.map(d => `<span>${d}</span>`).join('')}</div>`));
+    b.append(grid);
+    b.append(el('<div class="section-t">By week</div>'));
+    const l = el('<div class="list"></div>');
+    Object.keys(weeks).sort().forEach(wk => { const w = weeks[wk]; l.append(el(`<div class="li"><span class="nm">${weekTitle(wk)}</span><span class="v">${w.e ? w.g + ' / ' + w.e + ' green' : 'no scored days'}</span></div>`)); });
+    b.append(l);
+    b.append(el(`<div class="small dim" style="padding:0 4px">A day is green when its completion is at least ${S.settings.threshold}% (change in Settings). Outlined days have no due habits or are in the future.</div>`));
+  }
+}
+
+/* ========== Habit detail ========== */
+$('#detailBack').addEventListener('click', () => showScreen('stats'));
+function renderDetail() {
+  const h = habitById(S.ui.detailHabit); const b = $('#detailBody'); b.innerHTML = '';
+  if (!h) { $('#detailTitle').textContent = 'Habit'; b.append(el('<div class="empty">Habit not found.</div>')); return; }
+  $('#detailTitle').textContent = h.emoji + ' ' + h.name;
+  const ym = S.ui.statMonth, ws = S.ui.statWeek;
+  const ms = habitMonthStats(h, ym);
+  const wdays = weekDays(ws); let wok = 0, wdue = 0; wdays.forEach(d => { const s = habitDayStatus(h, d); if (s === 'ok') { wok++; wdue++; } else if (s === 'miss') wdue++; });
+  const sched = h.schedule.type === 'daily' ? 'Every day' : h.schedule.type === 'weekdays' ? h.schedule.days.slice().sort().map(i => DAYS[i]).join(' · ') : h.schedule.target + '× per ' + (h.schedule.type === 'weekly' ? 'week' : 'month');
+  b.append(el(`<div class="small muted">${esc(sched)} · ${{ check: 'Emoji check', time: 'Auto timestamp', value: 'Single value', count: 'Cumulative count' }[h.mode]}${h.note ? ' · ' + esc(h.note) : ''}${h.deletedAt ? ' · removed ' + h.deletedAt : ''}</div>`));
+  const tiles = el('<div class="tiles"></div>');
+  tiles.append(el(`<div class="tile"><span class="k">${monthTitle(ym)}</span><span class="v">${ms.pct == null ? '—' : ms.pct + '%'}</span><span class="s">${ms.ok}${isFlex(h) ? ' done' : ' / ' + ms.due + ' days'}</span></div>`));
+  tiles.append(el(`<div class="tile"><span class="k">Week of ${weekTitle(ws).split(' – ')[0]}</span><span class="v">${wdue ? Math.round(wok / wdue * 100) + '%' : '—'}</span><span class="s">${wok}${isFlex(h) ? ' done' : ' / ' + wdue}</span></div>`));
+  if (h.streak) tiles.append(el(`<div class="tile"><span class="k">Streak</span><span class="v" style="color:var(--streak)">🔥 ${currentStreak(h)}</span><span class="s">longest ${longestStreak(h)}</span></div>`));
+  else tiles.append(el(`<div class="tile"><span class="k">Streak</span><span class="v muted">off</span><span class="s">enable in Edit</span></div>`));
+  b.append(tiles);
+  if (isFlex(h)) { const p = periodProgress(h, todayStr()); b.append(el(`<div class="sumline"><span>Current ${h.schedule.type === 'weekly' ? 'week' : 'month'} goal</span><b>${p.n} / ${p.target}</b></div>`)); }
+  // numeric chart
+  if (h.mode === 'value' || h.mode === 'count') {
+    const seg = el(`<div class="seg" style="max-width:220px"><button data-v="week" class="${S.ui.detailRange === 'week' ? 'on' : ''}">Week</button><button data-v="month" class="${S.ui.detailRange === 'month' ? 'on' : ''}">Month</button><button data-v="3m" class="${S.ui.detailRange === '3m' ? 'on' : ''}">3 months</button></div>`);
+    seg.querySelectorAll('button').forEach(x => x.addEventListener('click', () => { S.ui.detailRange = x.dataset.v; renderDetail(); }));
+    b.append(seg);
+    const r = S.ui.detailRange; let days;
+    if (r === 'week') days = wdays; else if (r === 'month') days = monthDays(ym); else { const end = monthDays(ym).slice(-1)[0]; const start = addMonths(ym, -2) + '-01'; days = []; let d = start; while (d <= end) { days.push(d); d = addDays(d, 1); } }
+    const pts = days.filter(d => d <= todayStr()).map(d => { const l = getLog(h.id, d); const v = h.mode === 'value' ? (l && l.value != null ? l.value : null) : (l && l.total != null ? l.total : null); return { d, v }; });
+    const vals = pts.filter(p => p.v != null).map(p => p.v);
+    const avg = vals.length ? vals.reduce((a, c) => a + c, 0) / vals.length : null;
+    const fmt = v => h.mode === 'value' ? fmtValue(h, v) : fmtNum(v) + (h.count.unit ? ' ' + h.count.unit : '');
+    const target = h.mode === 'value' ? h.value.target : h.count.target;
+    const canvas = el('<canvas class="chart" aria-label="Chart"></canvas>');
+    b.append(canvas);
+    requestAnimationFrame(() => drawChart(canvas, pts, { bar: h.mode === 'count', target, fmt, timeFmt: h.mode === 'value' && h.value.format === 'time', durFmt: h.mode === 'value' && h.value.format === 'duration' }));
+    const trend = trendText(pts, h, fmt);
+    const met = target != null ? vals.filter(v => h.mode === 'count' ? v >= target : meetsTarget(h, v)).length : null;
+    b.append(el(`<div class="tiles"><div class="tile"><span class="k">Average</span><span class="v" style="font-size:18px">${avg == null ? '—' : esc(fmt(avg))}</span><span class="s">${vals.length} entr${vals.length === 1 ? 'y' : 'ies'}</span></div><div class="tile"><span class="k">${h.mode === 'count' ? 'Total' : 'Latest'}</span><span class="v" style="font-size:18px">${vals.length ? esc(fmt(h.mode === 'count' ? vals.reduce((a, c) => a + c, 0) : vals[vals.length - 1])) : '—'}</span><span class="s">${h.mode === 'count' ? 'in range' : pts.filter(p => p.v != null).slice(-1).map(p => p.d)[0] || ''}</span></div><div class="tile"><span class="k">${target != null ? 'Target met' : 'Trend'}</span><span class="v" style="font-size:18px">${target != null ? met + '/' + vals.length : esc(trend)}</span><span class="s">${target != null ? esc(fmt(target)) : 'vs. earlier half'}</span></div></div>`));
+    if (target != null) b.append(el(`<div class="small dim">${esc(trend)} · dashed line = target. Missing days are left blank, not counted as zero.</div>`));
+  }
+  // calendar history
+  b.append(el('<div class="section-t">History</div>'));
+  const nav = pnav(monthTitle(ym), () => { S.ui.statMonth = addMonths(S.ui.statMonth, -1); renderDetail(); }, () => { S.ui.statMonth = addMonths(S.ui.statMonth, 1); renderDetail(); });
+  b.append(nav);
+  const days = monthDays(ym); const first = dow(days[0]);
+  const grid = el('<div class="gl-grid"></div>');
+  for (let i = 0; i < first; i++) grid.append(el('<span class="blank"></span>'));
+  days.forEach(d => { const s = habitDayStatus(h, d); const l = getLog(h.id, d); let txt = s === 'ok' ? '✓' : ''; if (l && h.mode === 'value' && l.value != null) txt = `<small style="font-size:9px">${esc(fmtValue(h, l.value).split(' ')[0])}</small>`; if (l && h.mode === 'count' && l.total) txt = `<small style="font-size:9px">${fmtNum(l.total)}</small>`; grid.append(el(`<span class="${s === 'ok' ? 'ok' : s === 'miss' ? '' : 'na'}" title="${d}"><i>${Number(d.slice(8))}</i>${txt}</span>`)); });
+  b.append(el(`<div class="cal-dow">${DAYS.map(d => `<span>${d}</span>`).join('')}</div>`));
+  b.append(grid);
+  // log list
+  const L = S.logs[h.id] || {}; const keys = Object.keys(L).filter(d => d.startsWith(ym)).sort().reverse();
+  if (keys.length) {
+    b.append(el('<div class="section-t">Entries</div>'));
+    const l = el('<div class="list"></div>');
+    keys.forEach(d => { const e = L[d]; let v = ''; if (h.mode === 'value' && e.value != null) v = fmtValue(h, e.value); else if (h.mode === 'count') v = fmtNum(e.total || 0) + '/' + fmtNum(h.count.target); else if (h.mode === 'time' && e.at) v = fmtTime(e.at); else v = e.done ? 'done' : '—'; l.append(el(`<div class="li"><span class="nm">${d}</span><span class="v">${esc(v)}</span></div>`)); });
+    b.append(l);
+  }
+}
+function trendText(pts, h, fmt) {
+  const v = pts.filter(p => p.v != null).map(p => p.v); if (v.length < 4) return 'Not enough data';
+  const half = Math.floor(v.length / 2); const a = v.slice(0, half), c = v.slice(half);
+  const ma = a.reduce((x, y) => x + y, 0) / a.length, mc = c.reduce((x, y) => x + y, 0) / c.length; const d = mc - ma;
+  if (Math.abs(d) < 1e-9) return 'Flat';
+  const unitless = h.mode === 'value' && h.value.format !== 'number';
+  return (d > 0 ? '▲ ' : '▼ ') + (unitless ? (h.value.format === 'time' ? Math.round(Math.abs(d)) + ' min' : fmtDuration(Math.abs(d))) : fmtNum(Math.abs(d)) + (h.mode === 'value' ? (h.value.unit ? ' ' + h.value.unit : '') : (h.count.unit ? ' ' + h.count.unit : '')));
+}
+function drawChart(canvas, pts, o) {
+  const dpr = window.devicePixelRatio || 1; const W = canvas.clientWidth || 340, H = 190;
+  canvas.width = W * dpr; canvas.height = H * dpr; const ctx = canvas.getContext('2d'); ctx.scale(dpr, dpr);
+  const cs = getComputedStyle(document.documentElement);
+  const col = n => cs.getPropertyValue(n).trim();
+  const pl = 44, pr = 12, pt = 14, pb = 26; const iw = W - pl - pr, ih = H - pt - pb;
+  const vals = pts.filter(p => p.v != null).map(p => p.v);
+  if (!vals.length) { ctx.fillStyle = col('--muted'); ctx.font = '13px ' + col('--font'); ctx.textAlign = 'center'; ctx.fillText('No entries in this range', W / 2, H / 2); return; }
+  let lo = Math.min(...vals), hi = Math.max(...vals);
+  if (o.target != null) { lo = Math.min(lo, o.target); hi = Math.max(hi, o.target); }
+  if (o.bar) lo = 0;
+  if (hi === lo) { hi += 1; lo -= o.bar ? 0 : 1; }
+  const padV = (hi - lo) * 0.12; if (!o.bar) { lo -= padV; } hi += padV;
+  const y = v => pt + ih - (v - lo) / (hi - lo) * ih;
+  const n = pts.length; const x = i => pl + (n === 1 ? iw / 2 : i / (n - 1) * iw);
+  // grid + y labels
+  ctx.strokeStyle = col('--line'); ctx.lineWidth = 1; ctx.fillStyle = col('--muted'); ctx.font = '10px ' + col('--font'); ctx.textAlign = 'right'; ctx.textBaseline = 'middle';
+  const ticks = 4;
+  for (let i = 0; i <= ticks; i++) { const v = lo + (hi - lo) * i / ticks; const yy = y(v); ctx.beginPath(); ctx.moveTo(pl, yy); ctx.lineTo(W - pr, yy); ctx.stroke(); ctx.fillText(o.timeFmt ? fmtMinutes(v).replace(' ', '') : o.durFmt ? (Math.round(v / 6) / 10) + 'h' : fmtNum(v, Math.abs(hi - lo) < 10 ? 1 : 0), pl - 6, yy); }
+  // x labels
+  ctx.textAlign = 'center'; ctx.textBaseline = 'top';
+  const step = Math.max(1, Math.ceil(n / 7));
+  pts.forEach((p, i) => { if (i % step === 0 || i === n - 1) { const d = parseDate(p.d); ctx.fillText(n <= 7 ? DAYS[d.getDay()] : MONTHS_S[d.getMonth()] + ' ' + d.getDate(), x(i), pt + ih + 8); } });
+  // target
+  if (o.target != null) { ctx.save(); ctx.setLineDash([4, 4]); ctx.strokeStyle = col('--sage'); ctx.beginPath(); ctx.moveTo(pl, y(o.target)); ctx.lineTo(W - pr, y(o.target)); ctx.stroke(); ctx.restore(); }
+  const accent = col('--accent');
+  if (o.bar) {
+    const bw = Math.max(3, Math.min(22, iw / n * 0.6));
+    pts.forEach((p, i) => { if (p.v == null) return; const met = o.target != null && p.v >= o.target; ctx.fillStyle = met ? accent : col('--sage'); ctx.globalAlpha = met ? 1 : 0.55; const yy = y(p.v); ctx.beginPath(); ctx.roundRect ? ctx.roundRect(x(i) - bw / 2, yy, bw, pt + ih - yy, 3) : ctx.rect(x(i) - bw / 2, yy, bw, pt + ih - yy); ctx.fill(); ctx.globalAlpha = 1; });
+  } else {
+    ctx.strokeStyle = accent; ctx.lineWidth = 2; ctx.lineJoin = 'round'; ctx.beginPath(); let started = false;
+    pts.forEach((p, i) => { if (p.v == null) { return; } const xx = x(i), yy = y(p.v); if (!started) { ctx.moveTo(xx, yy); started = true; } else ctx.lineTo(xx, yy); });
+    ctx.stroke();
+    // area
+    ctx.save(); ctx.globalAlpha = 0.12; ctx.fillStyle = accent; ctx.beginPath(); let first = null, last = null;
+    pts.forEach((p, i) => { if (p.v == null) return; if (first == null) { first = i; ctx.moveTo(x(i), y(p.v)); } else ctx.lineTo(x(i), y(p.v)); last = i; });
+    if (first != null) { ctx.lineTo(x(last), pt + ih); ctx.lineTo(x(first), pt + ih); ctx.closePath(); ctx.fill(); } ctx.restore();
+    pts.forEach((p, i) => { if (p.v == null) return; ctx.fillStyle = col('--card'); ctx.strokeStyle = accent; ctx.lineWidth = 2; ctx.beginPath(); ctx.arc(x(i), y(p.v), i === n - 1 || n <= 31 ? 3 : 2, 0, Math.PI * 2); ctx.fill(); ctx.stroke(); });
+    // emphasize last point value
+    const lastIdx = pts.map((p, i) => p.v != null ? i : -1).filter(i => i >= 0).pop();
+    if (lastIdx != null) { ctx.fillStyle = col('--fg'); ctx.font = 'bold 11px ' + col('--font'); ctx.textAlign = lastIdx > n * 0.7 ? 'right' : 'left'; ctx.textBaseline = 'bottom'; ctx.fillText(o.fmt(pts[lastIdx].v), x(lastIdx) + (lastIdx > n * 0.7 ? -6 : 6), y(pts[lastIdx].v) - 4); }
+  }
+}
+
+/* ========== Boot ========== */
+async function boot() {
+  await Store.open();
+  const [habits, tags, logs, settings] = await Promise.all([Store.get('habits'), Store.get('tags'), Store.get('logs'), Store.get('settings')]);
+  if (Array.isArray(habits)) S.habits = habits; if (Array.isArray(tags)) S.tags = tags; if (logs && typeof logs === 'object') S.logs = logs; if (settings) S.settings = Object.assign(S.settings, settings);
+  // migrate / defaults
+  S.habits.forEach((h, i) => { const d = DEFAULT_HABIT(); h.value = Object.assign(d.value, h.value || {}); h.count = Object.assign(d.count, h.count || {}); h.schedule = Object.assign(d.schedule, h.schedule || {}); if (h.order == null) h.order = i; if (!h.tags) h.tags = []; if (!h.timeOfDay) h.timeOfDay = 'any'; if (h.streak == null) h.streak = true; });
+  try { if (navigator.storage && navigator.storage.persist) navigator.storage.persist(); } catch (e) {}
+  try { if ('serviceWorker' in navigator && location.protocol === 'https:') navigator.serviceWorker.register('sw.js').catch(() => {}); } catch (e) {}
+  renderHome();
+  document.addEventListener('visibilitychange', () => { if (!document.hidden) { const t = todayStr(); if (S.ui.date !== t && S.ui.screen === 'home' && S.ui._lastToday !== t) { S.ui.date = t; S.ui.weekStart = weekStart(t); renderHome(); } S.ui._lastToday = t; } });
+  S.ui._lastToday = todayStr();
+}
+boot();
+
+window.__app = { S, DEFAULT_HABIT, Sheet };
+
+</script>
+</body>
+</html>

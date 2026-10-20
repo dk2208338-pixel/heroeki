@@ -1,0 +1,9 @@
+{
+  "name": "My Routines",
+  "short_name": "Routines",
+  "start_url": "./routine.html",
+  "display": "standalone",
+  "background_color": "#0F1113",
+  "theme_color": "#0F1113",
+  "icons": [{"src": "icon-180.png", "sizes": "180x180", "type": "image/png"}]
+}

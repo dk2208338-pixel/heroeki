@@ -52,7 +52,7 @@ html{overflow:hidden;position:fixed;inset:0;width:100%}
 .scroll{flex:1;min-height:0;overflow-y:auto;-webkit-overflow-scrolling:touch;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:0 calc(var(--nav-h) + 90px + var(--nav-pad))}
 .scroll.tight{padding-bottom:calc(var(--nav-h) + 8px);overscroll-behavior:contain}
 .top{padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:10px 0}
-nav.tabbar{position:fixed;left:0;right:0;bottom:0;z-index:20;background:rgba(15,17,19,.92);backdrop-filter:saturate(1.4) blur(14px);-webkit-backdrop-filter:saturate(1.4) blur(14px);border-top:1px solid var(--line);display:flex;justify-content:space-around;padding:3px max(24px,env(safe-area-inset-left,0px)) 0 max(24px,env(safe-area-inset-right,0px));height:var(--nav-h)}
+nav.tabbar{position:fixed;left:0;right:0;bottom:-16px;z-index:20;background:rgba(15,17,19,.92);backdrop-filter:saturate(1.4) blur(14px);-webkit-backdrop-filter:saturate(1.4) blur(14px);border-top:1px solid var(--line);display:flex;justify-content:space-around;padding:3px max(24px,env(safe-area-inset-left,0px)) 0 max(24px,env(safe-area-inset-right,0px));height:var(--nav-h)}
 nav.tabbar button{display:flex;flex-direction:column;align-items:center;gap:1px;min-width:84px;padding:2px 0;color:var(--muted);font-size:10px;font-weight:500;border-radius:10px}
 nav.tabbar button.active{color:var(--accent);font-weight:600}
 nav.tabbar svg{width:22px;height:22px}
